@@ -1,19 +1,10 @@
+const API = "https://website-9gq9.onrender.com";
+
 const products = [
   { id: 1, name: "T-Shirt", price: 20, image: "https://picsum.photos/200?1" },
   { id: 2, name: "Jeans", price: 40, image: "https://picsum.photos/200?2" },
   { id: 3, name: "Jacket", price: 60, image: "https://picsum.photos/200?3" },
-  { id: 4, name: "Hoodie", price: 35, image: "https://picsum.photos/200?4" },
-  { id: 5, name: "Shirt", price: 25, image: "https://picsum.photos/200?5" },
-  { id: 6, name: "Shorts", price: 18, image: "https://picsum.photos/200?6" },
-  { id: 7, name: "Sweater", price: 45, image: "https://picsum.photos/200?7" },
-  { id: 8, name: "Blazer", price: 80, image: "https://picsum.photos/200?8" },
-  { id: 9, name: "Track Pants", price: 30, image: "https://picsum.photos/200?9" },
-  { id: 10, name: "Kurta", price: 22, image: "https://picsum.photos/200?10" },
-  { id: 11, name: "Saree", price: 70, image: "https://picsum.photos/200?11" },
-  { id: 12, name: "Lehenga", price: 120, image: "https://picsum.photos/200?12" },
-  { id: 13, name: "Coat", price: 90, image: "https://picsum.photos/200?13" },
-  { id: 14, name: "Tank Top", price: 15, image: "https://picsum.photos/200?14" },
-  { id: 15, name: "Cargo Pants", price: 50, image: "https://picsum.photos/200?15" }
+  { id: 4, name: "Hoodie", price: 35, image: "https://picsum.photos/200?4" }
 ];
 
 let cart = [];
@@ -21,7 +12,6 @@ let cart = [];
 const cartPanel = document.getElementById("cartPanel");
 const overlay = document.getElementById("overlay");
 
-/* LOAD PRODUCTS */
 function loadProducts() {
   const container = document.getElementById("products");
 
@@ -40,7 +30,6 @@ function loadProducts() {
   });
 }
 
-/* ADD */
 function addToCart(id) {
   const item = cart.find(p => p.id === id);
   if (item) item.qty++;
@@ -51,13 +40,11 @@ function addToCart(id) {
   updateCart();
 }
 
-/* INCREASE */
 function increase(id) {
   cart.find(p => p.id === id).qty++;
   updateCart();
 }
 
-/* DECREASE */
 function decrease(id) {
   const item = cart.find(p => p.id === id);
   if (item.qty > 1) item.qty--;
@@ -65,7 +52,6 @@ function decrease(id) {
   updateCart();
 }
 
-/* UPDATE */
 function updateCart() {
   const cartItems = document.getElementById("cartItems");
   const totalEl = document.getElementById("total");
@@ -83,13 +69,11 @@ function updateCart() {
 
     div.innerHTML = `
       <span>${item.name}</span>
-
       <div class="qty">
         <button onclick="decrease(${item.id})">-</button>
         <span>${item.qty}</span>
         <button onclick="increase(${item.id})">+</button>
       </div>
-
       <span>$${item.price * item.qty}</span>
     `;
 
@@ -100,33 +84,34 @@ function updateCart() {
   countEl.innerText = count;
 }
 
-/* TOGGLE */
 document.getElementById("cartBtn").onclick = () => {
   cartPanel.classList.toggle("show");
   overlay.classList.toggle("show");
 };
 
-/* CLOSE BUTTON */
 document.getElementById("closeCart").onclick = () => {
   cartPanel.classList.remove("show");
   overlay.classList.remove("show");
 };
 
-/* OVERLAY CLICK */
 overlay.onclick = () => {
   cartPanel.classList.remove("show");
   overlay.classList.remove("show");
 };
 
-/* CHECKOUT */
-document.getElementById("checkoutBtn").onclick = () => {
+document.getElementById("checkoutBtn").onclick = async () => {
   if (cart.length === 0) return alert("Cart empty!");
-  alert("✅ Order placed!");
-  cart = [];
-  updateCart();
-  cartPanel.classList.remove("show");
-  overlay.classList.remove("show");
+
+  const res = await fetch(`${API}/payment/create-checkout-session`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ items: cart })
+  });
+
+  const data = await res.json();
+  window.location.href = data.url;
 };
 
-/* INIT */
 loadProducts();
