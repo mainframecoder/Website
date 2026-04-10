@@ -1,166 +1,167 @@
-const API = "https://website-9gq9.onrender.com";
-
-/* 🔥 50 PRODUCTS (REAL IMAGES) */
-const products = [
-  ...Array.from({length:50}, (_,i)=>({
-    id:i+1,
-    name:[
-      "T-Shirt","Jeans","Hoodie","Jacket","Sneakers","Cap","Watch","Backpack",
-      "Sunglasses","Shirt","Shoes","Coat","Shorts","Earbuds","Bag","Vest"
-    ][i%16] + " " + (i+1),
-
-    price: Math.floor(Math.random()*150)+20,
-
-    img:`https://picsum.photos/400/300?random=${i+1}`,
-
-    rating: Math.floor(Math.random()*2)+4
-  }))
-];
-
-localStorage.setItem("products", JSON.stringify(products));
+const API = "https://website-9gq9.onrender.com"; // 🔥 your Render backend
 
 let cart = [];
 let wishlist = [];
+let products = [
+  { id:1, name:"T-Shirt 1", price:55, img:"https://picsum.photos/300?1", rating:4 },
+  { id:2, name:"Jeans 2", price:56, img:"https://picsum.photos/300?2", rating:5 },
+  { id:3, name:"Hoodie 3", price:68, img:"https://picsum.photos/300?3", rating:4 },
+  { id:4, name:"Sneakers 4", price:120, img:"https://picsum.photos/300?4", rating:5 },
+  { id:5, name:"Cap 5", price:25, img:"https://picsum.photos/300?5", rating:3 },
+  { id:6, name:"Watch 6", price:150, img:"https://picsum.photos/300?6", rating:5 },
+  { id:7, name:"Shirt 7", price:45, img:"https://picsum.photos/300?7", rating:4 },
+  { id:8, name:"Jacket 8", price:180, img:"https://picsum.photos/300?8", rating:5 },
+  { id:9, name:"Shoes 9", price:95, img:"https://picsum.photos/300?9", rating:4 },
+  { id:10, name:"Bag 10", price:130, img:"https://picsum.photos/300?10", rating:5 },
+  { id:11, name:"Glasses 11", price:60, img:"https://picsum.photos/300?11", rating:4 },
+  { id:12, name:"Belt 12", price:40, img:"https://picsum.photos/300?12", rating:3 },
+  { id:13, name:"Sweater 13", price:70, img:"https://picsum.photos/300?13", rating:5 },
+  { id:14, name:"Shorts 14", price:35, img:"https://picsum.photos/300?14", rating:4 },
+  { id:15, name:"Perfume 15", price:200, img:"https://picsum.photos/300?15", rating:5 }
+];
 
-/* 🔥 RENDER */
-function render(list = products) {
-  const el = document.getElementById("products");
-  el.innerHTML = "";
+function renderProducts(list = products) {
+  const container = document.getElementById("products");
+  container.innerHTML = "";
 
   list.forEach(p => {
-    el.innerHTML += `
+    container.innerHTML += `
       <div class="card">
-        <span class="heart" onclick="wish(${p.id})">❤️</span>
-
-        <img src="${p.img}" onclick="openProduct(${p.id})">
-
+        <div class="heart" onclick="toggleWishlist(${p.id})">❤️</div>
+        <img src="${p.img}" onclick="openProduct(${p.id})"/>
         <h3>${p.name}</h3>
-        <p style="color:#f59e0b">${"⭐".repeat(p.rating)}</p>
+        <p>${"⭐".repeat(p.rating)}</p>
         <p>$${p.price}</p>
-
-        <button onclick="add(${p.id})">🛒 Add to Cart</button>
+        <button onclick="addToCart(${p.id})">🛒 Add to Cart</button>
       </div>
     `;
   });
 }
 
-/* 🔥 ADD TO CART */
-function add(id) {
-  const item = cart.find(i => i.id === id);
-
+/* CART */
+function addToCart(id) {
+  let item = cart.find(i => i.id === id);
   if (item) item.qty++;
   else {
-    const p = products.find(x => x.id === id);
-    cart.push({...p, qty:1});
+    let p = products.find(x => x.id === id);
+    cart.push({ ...p, qty: 1 });
   }
-
-  update();
+  renderCart();
 }
 
-/* 🔥 CART UPDATE (PREMIUM UI) */
-function update() {
+function changeQty(id, delta) {
+  let item = cart.find(i => i.id === id);
+  if (!item) return;
+
+  item.qty += delta;
+  if (item.qty <= 0) {
+    cart = cart.filter(i => i.id !== id);
+  }
+
+  renderCart();
+}
+
+function renderCart() {
   const el = document.getElementById("cartItems");
-  const total = document.getElementById("total");
   const count = document.getElementById("cartCount");
+  const totalEl = document.getElementById("cartTotal");
 
   el.innerHTML = "";
-  let t = 0;
+  let total = 0;
 
-  cart.forEach((i, index) => {
-    t += i.price * i.qty;
+  cart.forEach(i => {
+    total += i.price * i.qty;
 
     el.innerHTML += `
       <div class="cart-item">
         <div>
-          <strong>${i.name}</strong><br>
+          <b>${i.name}</b><br/>
           $${i.price}
         </div>
-
         <div class="qty-box">
-          <button onclick="dec(${index})">−</button>
-          <span>${i.qty}</span>
-          <button onclick="inc(${index})">+</button>
+          <button onclick="changeQty(${i.id}, -1)">-</button>
+          ${i.qty}
+          <button onclick="changeQty(${i.id}, 1)">+</button>
         </div>
       </div>
     `;
   });
 
-  total.innerText = t;
   count.innerText = cart.length;
+  totalEl.innerText = "$" + total;
 }
 
-/* 🔥 QTY */
-function inc(i){ cart[i].qty++; update(); }
-function dec(i){
-  cart[i].qty--;
-  if(cart[i].qty<=0) cart.splice(i,1);
-  update();
-}
-
-/* 🔥 SEARCH */
-document.getElementById("search").oninput = e => {
-  const v = e.target.value.toLowerCase();
-  render(products.filter(p => p.name.toLowerCase().includes(v)));
-};
-
-/* 🔥 FILTER */
-document.getElementById("filter").onchange = e => {
-  const v = e.target.value;
-
-  if(v==="low") render(products.filter(p=>p.price<50));
-  else if(v==="high") render(products.filter(p=>p.price>=50));
-  else render(products);
-};
-
-/* 🔥 CART OPEN */
-document.getElementById("cartBtn").onclick = () => {
-  document.getElementById("cartPanel").classList.toggle("show");
+/* CART UI */
+function toggleCart() {
+  document.getElementById("cart").classList.toggle("show");
   document.getElementById("overlay").classList.toggle("show");
-};
+}
 
-/* 🔥 CHECKOUT (FIXED) */
-document.getElementById("checkoutBtn").onclick = async () => {
+/* SEARCH */
+function searchProducts(val) {
+  let filtered = products.filter(p =>
+    p.name.toLowerCase().includes(val.toLowerCase())
+  );
+  renderProducts(filtered);
+}
 
-  if(cart.length === 0){
-    alert("Cart is empty");
-    return;
-  }
+/* FILTER */
+function filterPrice(val) {
+  if (val === "all") return renderProducts();
 
-  const address = prompt("Enter delivery address");
+  let filtered = products.filter(p =>
+    val === "above" ? p.price > 50 : p.price <= 50
+  );
 
-  const res = await fetch(`${API}/payment/create-checkout-session`, {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      items: cart.map(i => ({
-        name: i.name,
-        price: i.price,
-        qty: i.qty
-      })),
-      address
-    })
-  });
+  renderProducts(filtered);
+}
 
-  const data = await res.json();
-
-  console.log("Stripe response:", data);
-
-  if(data.url){
-    window.location.href = data.url;
+/* WISHLIST */
+function toggleWishlist(id) {
+  if (wishlist.includes(id)) {
+    wishlist = wishlist.filter(x => x !== id);
   } else {
-    alert("Checkout failed");
+    wishlist.push(id);
   }
-};
+}
 
-/* 🔥 PRODUCT PAGE */
-function openProduct(id){
+/* PRODUCT PAGE */
+function openProduct(id) {
   window.open(`product.html?id=${id}`, "_blank");
 }
 
-/* 🔥 WISHLIST */
-function wish(){
-  alert("Added to wishlist ❤️");
+/* CHECKOUT (REAL STRIPE) */
+async function checkout() {
+  if (cart.length === 0) {
+    alert("Cart empty");
+    return;
+  }
+
+  let address = prompt("Enter delivery address:");
+  if (!address) return;
+
+  try {
+    const res = await fetch(`${API}/payment/create-checkout-session`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ cart, address }),
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url; // 🔥 redirect to Stripe
+    } else {
+      alert("Payment error");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
 }
 
 /* INIT */
-render();
+renderProducts();
+renderCart();
