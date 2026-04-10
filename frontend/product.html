@@ -5,36 +5,64 @@
 </head>
 <body>
 
-<div id="product"></div>
+<div style="display:flex; gap:40px; padding:40px;">
+
+  <!-- IMAGE GALLERY -->
+  <div>
+    <img id="mainImg" width="350">
+
+    <div id="thumbs" style="display:flex; gap:10px; margin-top:10px;"></div>
+  </div>
+
+  <!-- DETAILS -->
+  <div>
+    <h1 id="name"></h1>
+    <p id="price"></p>
+
+    <h3>Select Size</h3>
+    <select>
+      <option>S</option>
+      <option>M</option>
+      <option>L</option>
+      <option>XL</option>
+    </select>
+
+    <br><br>
+    <button onclick="add()">Add to Cart</button>
+  </div>
+
+</div>
 
 <script>
-const products = JSON.parse(localStorage.getItem("products")) || [];
+const products = JSON.parse(localStorage.getItem("products"));
 
 const id = new URLSearchParams(location.search).get("id");
-const p = products.find(x=>x.id==id) || {
-  name:"Product",
-  img:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
-  price:50
-};
+const p = products.find(x=>x.id==id);
 
-document.getElementById("product").innerHTML=`
-  <h1>${p.name}</h1>
-  <img src="${p.img}" width="300">
-  <p>$${p.price}</p>
+/* MULTI IMAGES (FAKE GALLERY) */
+const imgs = [
+  p.img,
+  p.img + "?1",
+  p.img + "?2",
+  p.img + "?3"
+];
 
-  <h3>Select Size</h3>
-  <select>
-    <option>S</option>
-    <option>M</option>
-    <option>L</option>
-    <option>XL</option>
-  </select>
+document.getElementById("mainImg").src = imgs[0];
+document.getElementById("name").innerText = p.name;
+document.getElementById("price").innerText = "$" + p.price;
 
-  <button onclick="add()">Add to Cart</button>
-`;
+/* THUMBNAILS */
+const thumbs = document.getElementById("thumbs");
+imgs.forEach(i=>{
+  thumbs.innerHTML += `<img src="${i}" width="70" onclick="change('${i}')">`;
+});
+
+function change(src){
+  document.getElementById("mainImg").src = src;
+}
 
 function add(){
-  alert("Added to cart");
+  alert("Added to cart 🛒");
 }
 </script>
 
