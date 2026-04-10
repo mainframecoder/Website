@@ -1,8 +1,5 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Track Order</title>
-</head>
 <body style="font-family:Arial; padding:40px">
 
 <h1>📦 Order Tracking</h1>
@@ -10,23 +7,11 @@
 <div id="status"></div>
 
 <script>
-const steps = [
-  "Order Placed",
-  "Packed",
-  "Shipped",
-  "Out for Delivery",
-  "Delivered"
-];
-
-// fake progress (for now)
-let current = Math.floor(Math.random() * 5);
+const steps = ["Placed","Packed","Shipped","Out for delivery","Delivered"];
+let current = 2;
 
 document.getElementById("status").innerHTML =
-  steps.map((s, i) => `
-    <p style="color:${i <= current ? "green" : "gray"}">
-      ${i <= current ? "✔" : "○"} ${s}
-    </p>
-  `).join("");
+  steps.map((s,i)=> `<p style="color:${i<=current?"green":"gray"}">${s}</p>`).join("");
 </script>
 
 </body>
