@@ -164,3 +164,4 @@ document.getElementById("checkoutBtn").onclick = async () => {
 };
 
 loadProducts();
+div.style.animation = "fadeIn 0.4s ease";
