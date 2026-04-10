@@ -54,18 +54,14 @@ def create_checkout(data: CheckoutRequest):
     return {"url": session.url}
 
 
-# 🔥 WEBHOOK (REAL ORDER SAVE)
 @router.post("/webhook")
 async def stripe_webhook(request: Request):
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
 
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, WEBHOOK_SECRET
-        )
-    except Exception as e:
-        return {"error": str(e)}
+    event = stripe.Webhook.construct_event(
+        payload, sig_header, WEBHOOK_SECRET
+    )
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
