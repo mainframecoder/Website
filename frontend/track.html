@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
-<body style="font-family:Arial; padding:40px">
+<body>
 
-<h1>📦 Order Tracking</h1>
-
-<div id="status"></div>
+<h1>Track Order</h1>
 
 <script>
-const steps = ["Placed","Packed","Shipped","Out for delivery","Delivered"];
-let current = 2;
+const id=prompt("Enter Order ID");
 
-document.getElementById("status").innerHTML =
-  steps.map((s,i)=> `<p style="color:${i<=current?"green":"gray"}">${s}</p>`).join("");
+fetch(`https://website-9gq9.onrender.com/orders/${id}`)
+.then(r=>r.json())
+.then(d=>{
+  document.body.innerHTML+=`<h2>${d.status}</h2>`;
+});
 </script>
 
 </body>
