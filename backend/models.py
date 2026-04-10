@@ -1,10 +1,13 @@
 from pydantic import BaseModel
+from typing import List
 
-class Product(BaseModel):
+class CartItem(BaseModel):
     name: str
     price: float
-    image: str
+    qty: int
 
 class Order(BaseModel):
-    items: list
+    items: List[CartItem]
     total: float
+    name: str
+    address: str
