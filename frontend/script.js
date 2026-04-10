@@ -1,25 +1,17 @@
-const API = "https://website-9gq9.onrender.com"; // 🔥 your Render backend
+const API = "https://website-9gq9.onrender.com";
 
 let cart = [];
 let wishlist = [];
-let products = [
-  { id:1, name:"T-Shirt 1", price:55, img:"https://picsum.photos/300?1", rating:4 },
-  { id:2, name:"Jeans 2", price:56, img:"https://picsum.photos/300?2", rating:5 },
-  { id:3, name:"Hoodie 3", price:68, img:"https://picsum.photos/300?3", rating:4 },
-  { id:4, name:"Sneakers 4", price:120, img:"https://picsum.photos/300?4", rating:5 },
-  { id:5, name:"Cap 5", price:25, img:"https://picsum.photos/300?5", rating:3 },
-  { id:6, name:"Watch 6", price:150, img:"https://picsum.photos/300?6", rating:5 },
-  { id:7, name:"Shirt 7", price:45, img:"https://picsum.photos/300?7", rating:4 },
-  { id:8, name:"Jacket 8", price:180, img:"https://picsum.photos/300?8", rating:5 },
-  { id:9, name:"Shoes 9", price:95, img:"https://picsum.photos/300?9", rating:4 },
-  { id:10, name:"Bag 10", price:130, img:"https://picsum.photos/300?10", rating:5 },
-  { id:11, name:"Glasses 11", price:60, img:"https://picsum.photos/300?11", rating:4 },
-  { id:12, name:"Belt 12", price:40, img:"https://picsum.photos/300?12", rating:3 },
-  { id:13, name:"Sweater 13", price:70, img:"https://picsum.photos/300?13", rating:5 },
-  { id:14, name:"Shorts 14", price:35, img:"https://picsum.photos/300?14", rating:4 },
-  { id:15, name:"Perfume 15", price:200, img:"https://picsum.photos/300?15", rating:5 }
-];
 
+let products = Array.from({ length: 20 }, (_, i) => ({
+  id: i + 1,
+  name: "Product " + (i + 1),
+  price: Math.floor(Math.random() * 150) + 20,
+  img: `https://picsum.photos/300?random=${i}`,
+  rating: Math.floor(Math.random() * 5) + 1
+}));
+
+/* RENDER PRODUCTS */
 function renderProducts(list = products) {
   const container = document.getElementById("products");
   container.innerHTML = "";
@@ -32,7 +24,7 @@ function renderProducts(list = products) {
         <h3>${p.name}</h3>
         <p>${"⭐".repeat(p.rating)}</p>
         <p>$${p.price}</p>
-        <button onclick="addToCart(${p.id})">🛒 Add to Cart</button>
+        <button onclick="addToCart(${p.id})">Add to Cart</button>
       </div>
     `;
   });
@@ -41,19 +33,24 @@ function renderProducts(list = products) {
 /* CART */
 function addToCart(id) {
   let item = cart.find(i => i.id === id);
-  if (item) item.qty++;
-  else {
+
+  if (item) {
+    item.qty++;
+  } else {
     let p = products.find(x => x.id === id);
     cart.push({ ...p, qty: 1 });
   }
+
   renderCart();
 }
 
+/* CHANGE QTY */
 function changeQty(id, delta) {
   let item = cart.find(i => i.id === id);
   if (!item) return;
 
   item.qty += delta;
+
   if (item.qty <= 0) {
     cart = cart.filter(i => i.id !== id);
   }
@@ -61,10 +58,13 @@ function changeQty(id, delta) {
   renderCart();
 }
 
+/* RENDER CART */
 function renderCart() {
   const el = document.getElementById("cartItems");
   const count = document.getElementById("cartCount");
   const totalEl = document.getElementById("cartTotal");
+
+  if (!el || !count || !totalEl) return;
 
   el.innerHTML = "";
   let total = 0;
@@ -78,6 +78,7 @@ function renderCart() {
           <b>${i.name}</b><br/>
           $${i.price}
         </div>
+
         <div class="qty-box">
           <button onclick="changeQty(${i.id}, -1)">-</button>
           ${i.qty}
@@ -130,7 +131,7 @@ function openProduct(id) {
   window.open(`product.html?id=${id}`, "_blank");
 }
 
-/* CHECKOUT (REAL STRIPE) */
+/* CHECKOUT */
 async function checkout() {
   if (cart.length === 0) {
     alert("Cart empty");
@@ -152,9 +153,9 @@ async function checkout() {
     const data = await res.json();
 
     if (data.url) {
-      window.location.href = data.url; // 🔥 redirect to Stripe
+      window.location.href = data.url;
     } else {
-      alert("Payment error");
+      alert("Payment failed");
     }
   } catch (err) {
     console.error(err);
