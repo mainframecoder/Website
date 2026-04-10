@@ -1,68 +1,81 @@
-const API = "https://website-9gq9.onrender.com";
-
 const products = [
-  { id:1,name:"T-Shirt",price:25,image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab"},
-  { id:2,name:"Jeans",price:60,image:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246"},
-  { id:3,name:"Hoodie",price:45,image:"https://images.unsplash.com/photo-1556821840-3a63f95609a7"},
+  { id:1, name:"T-Shirt", price:25, image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab" },
+  { id:2, name:"Jeans", price:60, image:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246" },
+  { id:3, name:"Hoodie", price:45, image:"https://images.unsplash.com/photo-1556821840-3a63f95609a7" },
+  { id:4, name:"Jacket", price:80, image:"https://images.unsplash.com/photo-1520975916090-3105956dac38" },
 ];
 
 let cart = [];
 
-function loadProducts(){
-  const c=document.getElementById("products");
-  products.forEach(p=>{
-    c.innerHTML+=`
-      <div class="card">
-        <img src="${p.image}" onclick="openProduct(${p.id})">
+// SAFE DOM LOAD
+window.onload = () => {
+
+  const cartPanel = document.getElementById("cartPanel");
+  const overlay = document.getElementById("overlay");
+
+  const productsDiv = document.getElementById("products");
+  const cartItems = document.getElementById("cartItems");
+  const totalEl = document.getElementById("total");
+  const countEl = document.getElementById("cartCount");
+
+  function loadProducts() {
+    products.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "card";
+
+      div.innerHTML = `
+        <img src="${p.image}">
         <h3>${p.name}</h3>
-        <p>$${p.price}</p>
-        <button onclick="add(${p.id})">Add</button>
-      </div>`;
-  });
-}
+        <p>$${p.price} CAD</p>
+        <button>Add</button>
+      `;
 
-function openProduct(id){
-  window.open(`product.html?id=${id}`,"_blank");
-}
+      div.querySelector("img").onclick = () => {
+        window.open(`product.html?id=${p.id}`, "_blank");
+      };
 
-function add(id){
-  const p=products.find(x=>x.id===id);
-  cart.push(p);
-  update();
-}
+      div.querySelector("button").onclick = () => {
+        cart.push(p);
+        updateCart();
+      };
 
-function update(){
-  const el=document.getElementById("cartItems");
-  const total=document.getElementById("total");
-  const count=document.getElementById("cartCount");
+      productsDiv.appendChild(div);
+    });
+  }
 
-  el.innerHTML="";
-  let t=0;
+  function updateCart() {
+    cartItems.innerHTML = "";
+    let total = 0;
 
-  cart.forEach(i=>{
-    t+=i.price;
-    el.innerHTML+=`<p>${i.name}</p>`;
-  });
+    cart.forEach(i => {
+      total += i.price;
+      cartItems.innerHTML += `<p>${i.name} - $${i.price}</p>`;
+    });
 
-  total.innerText=t;
-  count.innerText=cart.length;
-}
+    totalEl.innerText = total;
+    countEl.innerText = cart.length;
+  }
 
-document.getElementById("checkoutBtn").onclick=async()=>{
-  const name=prompt("Name");
-  const address=prompt("Address");
+  // CART TOGGLE
+  document.getElementById("cartBtn").onclick = () => {
+    cartPanel.classList.toggle("show");
+    overlay.classList.toggle("show");
+  };
 
-  const res=await fetch(`${API}/payment/create-checkout-session`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      items:cart.map(i=>({name:i.name,price:i.price,qty:1})),
-      name,address
-    })
-  });
+  document.getElementById("closeCart").onclick = () => {
+    cartPanel.classList.remove("show");
+    overlay.classList.remove("show");
+  };
 
-  const data=await res.json();
-  window.location.href=data.url;
+  overlay.onclick = () => {
+    cartPanel.classList.remove("show");
+    overlay.classList.remove("show");
+  };
+
+  // CHECKOUT (TEMP)
+  document.getElementById("checkoutBtn").onclick = () => {
+    alert("Checkout working!");
+  };
+
+  loadProducts();
 };
-
-loadProducts();
