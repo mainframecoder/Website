@@ -1,22 +1,40 @@
 <!DOCTYPE html>
 <html>
+<head>
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
 
-<div id="p"></div>
+<div id="product"></div>
 
 <script>
-const id=new URLSearchParams(location.search).get("id");
-const p=window.opener.products.find(x=>x.id==id);
+const products = JSON.parse(localStorage.getItem("products")) || [];
 
-document.getElementById("p").innerHTML=`
-<h1>${p.name}</h1>
-<img src="${p.image}" width="300">
-<button onclick="add()">Add</button>
+const id = new URLSearchParams(location.search).get("id");
+const p = products.find(x=>x.id==id) || {
+  name:"Product",
+  img:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
+  price:50
+};
+
+document.getElementById("product").innerHTML=`
+  <h1>${p.name}</h1>
+  <img src="${p.img}" width="300">
+  <p>$${p.price}</p>
+
+  <h3>Select Size</h3>
+  <select>
+    <option>S</option>
+    <option>M</option>
+    <option>L</option>
+    <option>XL</option>
+  </select>
+
+  <button onclick="add()">Add to Cart</button>
 `;
 
 function add(){
-  window.opener.cart.push(p);
-  window.opener.update();
+  alert("Added to cart");
 }
 </script>
 
