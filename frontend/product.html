@@ -1,30 +1,22 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Product</title>
-</head>
-<body style="font-family:Arial; padding:20px">
+<body>
 
-<div id="product"></div>
+<div id="p"></div>
 
 <script>
-const params = new URLSearchParams(window.location.search);
-const id = parseInt(params.get("id"));
+const id=new URLSearchParams(location.search).get("id");
+const p=window.opener.products.find(x=>x.id==id);
 
-const products = window.opener.products;
-const p = products.find(x => x.id === id);
-
-document.getElementById("product").innerHTML = `
-  <h1>${p.name}</h1>
-  <img src="${p.image}" width="300">
-  <h3>$${p.price} CAD</h3>
-  <button onclick="add()">Add to Cart</button>
+document.getElementById("p").innerHTML=`
+<h1>${p.name}</h1>
+<img src="${p.image}" width="300">
+<button onclick="add()">Add</button>
 `;
 
-function add() {
+function add(){
   window.opener.cart.push(p);
-  window.opener.updateCart();
-  alert("Added!");
+  window.opener.update();
 }
 </script>
 
