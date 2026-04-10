@@ -5,11 +5,10 @@ from routes import products, orders, payment
 
 app = FastAPI()
 
+# ✅ TEMP: allow ALL origins (fixes Vercel changing URLs)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://website-qpqdr5hjm-mainframecoders-projects.vercel.app"
-    ],
+    allow_origins=["*"],   # 👈 IMPORTANT
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
