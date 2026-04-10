@@ -1,18 +1,21 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 import stripe
 import os
 
-router = APIRouter()
+router = APIRouter(prefix="/payment")
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
+FRONTEND_URL = os.getenv("FRONTEND_URL")
+
 @router.post("/create-checkout-session")
-async def create_checkout_session(data: dict):
-    items = data.get("items", [])
+async def create_checkout_session(request: Request):
+    data = await request.json()
+    cart = data.get("cart", [])
 
     line_items = []
 
-    for item in items:
+    for item in cart:
         line_items.append({
             "price_data": {
                 "currency": "cad",
@@ -28,9 +31,8 @@ async def create_checkout_session(data: dict):
         payment_method_types=["card"],
         line_items=line_items,
         mode="payment",
-
-        success_url="https://website-9gq9.onrender.com",
-        cancel_url="https://website-9gq9.onrender.com",
+        success_url=f"{FRONTEND_URL}/success.html",
+        cancel_url=f"{FRONTEND_URL}",
     )
 
     return {"url": session.url}
