@@ -1,4 +1,66 @@
-/* ADD BUTTON (PRODUCT CARD) */
+body {
+  margin: 0;
+  font-family: 'Segoe UI';
+  background: #f5f5f5;
+}
+
+/* NAVBAR */
+.navbar {
+  position: sticky;
+  top: 0;
+  background: black;
+  color: white;
+  padding: 15px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  z-index: 1000;
+}
+
+.navbar input, .navbar select {
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+}
+
+/* GRID */
+.products {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 20px;
+}
+
+/* CARD */
+.card {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: 0.3s;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+.card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.card h3 {
+  margin: 10px;
+}
+
+.card p {
+  margin: 5px 10px;
+}
+
+/* BUTTON */
 .card button {
   width: calc(100% - 20px);
   margin: 10px;
@@ -9,72 +71,69 @@
   border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.card button:hover {
-  transform: scale(1.03);
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+/* HEART */
+.heart {
+  position: absolute;
+  margin: 10px;
+  color: red;
+  cursor: pointer;
 }
+
+/* CART */
+.cart {
+  position: fixed;
+  right: -350px;
+  top: 0;
+  width: 320px;
+  height: 100%;
+  background: white;
+  padding: 20px;
+  transition: 0.3s;
+  overflow-y: auto;
+}
+
+.cart.show { right: 0; }
+
+.overlay {
+  display: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.overlay.show { display: block; }
 
 /* CART ITEM */
 .cart-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-bottom: 15px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
 }
 
-/* PRODUCT NAME */
-.cart-item-name {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* QTY CONTROLS */
 .qty-box {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
-/* +/- BUTTON */
 .qty-box button {
   width: 28px;
   height: 28px;
   border: none;
-  background: #f1f5f9;
+  background: #eee;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
 }
 
-.qty-box button:hover {
-  background: #e2e8f0;
-}
-
-/* QTY NUMBER */
-.qty-number {
-  min-width: 20px;
-  text-align: center;
-}
-
-/* CHECKOUT BUTTON */
+/* CHECKOUT */
 #checkoutBtn {
   width: 100%;
   padding: 14px;
   border: none;
-  background: linear-gradient(135deg, #16a34a, #15803d);
+  background: green;
   color: white;
-  border-radius: 12px;
-  font-size: 16px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-#checkoutBtn:hover {
-  transform: scale(1.02);
+  border-radius: 10px;
 }
