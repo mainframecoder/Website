@@ -1,4 +1,4 @@
-const API = "https://website-9gq9.onrender.com";
+const API = "https://website-9gq9.onrender.com"; // ⚠️ your Render backend
 
 const products = [
   {id:1,name:"T-Shirt",price:25,img:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab"},
@@ -20,16 +20,20 @@ const products = [
 
 let cart = [];
 
+// DOM
+const productsDiv = document.getElementById("products");
 const cartPanel = document.getElementById("cartPanel");
 const overlay = document.getElementById("overlay");
+const cartItems = document.getElementById("cartItems");
+const totalEl = document.getElementById("total");
+const countEl = document.getElementById("cartCount");
 
+// LOAD PRODUCTS
 function loadProducts() {
-  const container = document.getElementById("products");
-
   products.forEach(p => {
-    container.innerHTML += `
+    productsDiv.innerHTML += `
       <div class="card">
-        <img src="${p.img}">
+        <img src="${p.img}" onclick="openProduct(${p.id})">
         <h3>${p.name}</h3>
         <p>$${p.price} CAD</p>
         <button onclick="add(${p.id})">Add</button>
@@ -38,40 +42,53 @@ function loadProducts() {
   });
 }
 
+// OPEN PRODUCT PAGE
+function openProduct(id){
+  window.open(`product.html?id=${id}`, "_blank");
+}
+
+// ADD TO CART
 function add(id){
-  const item = cart.find(i=>i.id===id);
-  if(item) item.qty++;
-  else {
-    const p = products.find(x=>x.id===id);
+  const item = cart.find(i => i.id === id);
+
+  if(item){
+    item.qty++;
+  } else {
+    const p = products.find(x => x.id === id);
     cart.push({...p, qty:1});
   }
-  update();
+
+  updateCart();
 }
 
+// INCREASE
 function increase(id){
-  cart.find(i=>i.id===id).qty++;
-  update();
+  cart.find(i => i.id === id).qty++;
+  updateCart();
 }
 
+// DECREASE
 function decrease(id){
-  const item = cart.find(i=>i.id===id);
-  if(item.qty>1) item.qty--;
-  else cart = cart.filter(i=>i.id!==id);
-  update();
+  const item = cart.find(i => i.id === id);
+
+  if(item.qty > 1){
+    item.qty--;
+  } else {
+    cart = cart.filter(i => i.id !== id);
+  }
+
+  updateCart();
 }
 
-function update(){
-  const el=document.getElementById("cartItems");
-  const total=document.getElementById("total");
-  const count=document.getElementById("cartCount");
-
-  el.innerHTML="";
-  let t=0;
+// UPDATE CART UI
+function updateCart(){
+  cartItems.innerHTML = "";
+  let total = 0;
 
   cart.forEach(i=>{
-    t += i.price * i.qty;
+    total += i.price * i.qty;
 
-    el.innerHTML += `
+    cartItems.innerHTML += `
       <div>
         <p>${i.name}</p>
         <div class="qty">
@@ -79,41 +96,71 @@ function update(){
           <span>${i.qty}</span>
           <button onclick="increase(${i.id})">+</button>
         </div>
-        <p>$${i.price * i.qty}</p>
+        <p>$${i.price * i.qty} CAD</p>
       </div>
+      <hr>
     `;
   });
 
-  total.innerText=t;
-  count.innerText=cart.length;
+  totalEl.innerText = total;
+  countEl.innerText = cart.length;
 }
 
-document.getElementById("cartBtn").onclick=()=>{
+// CART OPEN/CLOSE
+document.getElementById("cartBtn").onclick = ()=>{
   cartPanel.classList.toggle("show");
   overlay.classList.toggle("show");
 };
 
-overlay.onclick=()=>{
+overlay.onclick = ()=>{
   cartPanel.classList.remove("show");
   overlay.classList.remove("show");
 };
 
-document.getElementById("checkoutBtn").onclick = async ()=>{
-  const name = prompt("Name");
-  const address = prompt("Address");
+// ✅ REAL STRIPE CHECKOUT (FIXED)
+document.getElementById("checkoutBtn").onclick = async () => {
 
-  const res = await fetch(`${API}/payment/create-checkout-session`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      items:cart.map(i=>({name:i.name,price:i.price,qty:i.qty})),
-      name,
-      address
-    })
-  });
+  if(cart.length === 0){
+    alert("Cart empty");
+    return;
+  }
 
-  const data = await res.json();
-  window.location.href = data.url;
+  const name = prompt("Enter Name");
+  if(!name) return;
+
+  const address = prompt("Enter Address");
+  if(!address) return;
+
+  try {
+    const res = await fetch(`${API}/payment/create-checkout-session`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        items: cart.map(i => ({
+          name: i.name,
+          price: i.price,
+          qty: i.qty
+        })),
+        name,
+        address
+      })
+    });
+
+    const data = await res.json();
+
+    console.log("Stripe response:", data);
+
+    if(!data.url){
+      alert("Stripe error. Check backend.");
+      return;
+    }
+
+    window.location.href = data.url;
+
+  } catch(err){
+    console.error(err);
+    alert("Checkout failed. Check console.");
+  }
 };
 
 loadProducts();
