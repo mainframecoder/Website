@@ -29,8 +29,8 @@ async def create_checkout_session(data: dict):
         line_items=line_items,
         mode="payment",
 
-        success_url="https://website-xxxx.vercel.app/success.html",
-        cancel_url="https://website-xxxx.vercel.app/index.html",
+        success_url="https://website-9gq9.onrender.com",
+        cancel_url="https://website-9gq9.onrender.com",
     )
 
     return {"url": session.url}
