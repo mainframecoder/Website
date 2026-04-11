@@ -9,39 +9,43 @@
 
 <!-- NAVBAR -->
 <div class="navbar">
-  <h1>🛒 My Store</h1>
+  <h2>🛒 My Store</h2>
 
-  <input type="text" placeholder="Search..." oninput="searchProducts(this.value)">
+  <input type="text" id="search" placeholder="Search...">
 
-  <select onchange="filterPrice(this.value)">
+  <select id="filter">
     <option value="all">All</option>
-    <option value="below">Under $50</option>
-    <option value="above">Above $50</option>
+    <option value="low">Under $50</option>
+    <option value="high">Above $50</option>
   </select>
 
-  <button class="cart-btn" onclick="toggleCart()">
-    🛒 <span id="cartCount">0</span>
-  </button>
+  <div class="cart-icon" onclick="toggleCart()">
+    🛒 <span id="cart-count">0</span>
+  </div>
 </div>
 
 <!-- PRODUCTS -->
-<div id="products" class="products"></div>
+<div id="products" class="grid"></div>
 
-<!-- OVERLAY -->
-<div id="overlay" class="overlay" onclick="toggleCart()"></div>
+<!-- CART -->
+<div id="cart-panel" class="cart hidden">
 
-<!-- CART PANEL -->
-<div id="cart" class="cart">
   <h2>Your Cart</h2>
 
-  <div id="cartItems"></div>
+  <div id="cart-items"></div>
 
-  <h3>Total: <span id="cartTotal">$0</span></h3>
+  <h3 id="total">Total: $0</h3>
 
-  <button id="checkoutBtn" onclick="checkout()">Checkout</button>
+  <!-- ✅ ADDRESS FIELD -->
+  <input id="address" placeholder="Delivery Address" required />
+
+  <!-- ✅ EMAIL -->
+  <input id="email" placeholder="Email" />
+
+  <button onclick="checkout()">Checkout</button>
+
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
