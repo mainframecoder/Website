@@ -15,23 +15,14 @@ let cart = {};
 let currentCategory = "all";
 let currentPrice = "all";
 
-/* PRODUCTS */
-function renderProducts() {
-  let filtered = products.filter(p => {
-    let cat = currentCategory === "all" || p.category === currentCategory;
+/* SAVE PRODUCTS FOR PRODUCT PAGE */
+localStorage.setItem("products", JSON.stringify(products));
 
-    let price = true;
-    if(currentPrice==="low") price = p.price < 50;
-    if(currentPrice==="mid") price = p.price >=50 && p.price<=100;
-    if(currentPrice==="high") price = p.price >100;
-
-    return cat && price;
-  });
-
+function renderProducts(list = products) {
   const container = document.getElementById("products");
   container.innerHTML = "";
 
-  filtered.forEach(p => {
+  list.forEach(p => {
     container.innerHTML += `
       <div class="card" onclick="openProduct(${p.id})">
         <img src="${p.img}">
@@ -42,20 +33,37 @@ function renderProducts() {
   });
 }
 
-/* PRODUCT PAGE */
 function openProduct(id){
   window.location.href = "product.html?id=" + id;
 }
 
-/* FILTERS */
+function goHome(){
+  window.location.href = "/";
+}
+
 function filterCategory(val){
   currentCategory = val;
-  renderProducts();
+  applyFilters();
 }
 
 function filterPrice(val){
   currentPrice = val;
-  renderProducts();
+  applyFilters();
+}
+
+function applyFilters(){
+  let filtered = products.filter(p => {
+    let cat = currentCategory === "all" || p.category === currentCategory;
+
+    let price = true;
+    if(currentPrice==="low") price = p.price < 50;
+    if(currentPrice==="mid") price = p.price <=100 && p.price>=50;
+    if(currentPrice==="high") price = p.price >100;
+
+    return cat && price;
+  });
+
+  renderProducts(filtered);
 }
 
 function searchProducts(){
@@ -65,23 +73,33 @@ function searchProducts(){
     p.name.toLowerCase().includes(val)
   );
 
-  const container = document.getElementById("products");
-  container.innerHTML = "";
-
-  filtered.forEach(p => {
-    container.innerHTML += `
-      <div class="card">
-        <img src="${p.img}">
-        <h3>${p.name}</h3>
-        <p>$${p.price}</p>
-      </div>
-    `;
-  });
+  renderProducts(filtered);
 }
 
 /* CART */
 function openCart(){document.getElementById("cartModal").style.display="block";}
 function closeCart(){document.getElementById("cartModal").style.display="none";}
+
+function addToCart(id){
+  cart[id] = (cart[id]||0)+1;
+  renderCart();
+}
+
+function renderCart(){
+  let html="";
+  let total=0;
+
+  Object.keys(cart).forEach(id=>{
+    let p=products.find(x=>x.id==id);
+    let qty=cart[id];
+    total += p.price*qty;
+
+    html += `<p>${p.name} x ${qty}</p>`;
+  });
+
+  document.getElementById("cartItems").innerHTML=html;
+  document.getElementById("total").innerText="Total: $"+total;
+}
 
 /* INIT */
 renderProducts();
