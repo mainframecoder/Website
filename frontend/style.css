@@ -8,8 +8,15 @@
 /* BODY */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-  background: linear-gradient(180deg, #0b0f19, #0e1628);
+  background: radial-gradient(circle at top, #1e293b, #0f172a);
   color: #fff;
+}
+
+/* MAIN CONTAINER (🔥 FIX STRETCH ISSUE) */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 /* HEADER */
@@ -17,12 +24,18 @@ header {
   position: sticky;
   top: 0;
   backdrop-filter: blur(20px);
-  background: rgba(20, 25, 40, 0.6);
-  padding: 16px 40px;
+  background: rgba(30, 41, 59, 0.7);
+  padding: 18px 0;
+  margin-bottom: 20px;
+}
+
+/* HEADER INNER */
+.header-inner {
+  max-width: 1200px;
+  margin: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  z-index: 10;
 }
 
 /* TITLE */
@@ -45,7 +58,7 @@ header select {
 
 /* CART BUTTON */
 .cart-btn {
-  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
   border: none;
   padding: 10px 16px;
   border-radius: 10px;
@@ -58,65 +71,60 @@ header select {
   transform: translateY(-2px);
 }
 
-/* GRID */
+/* PRODUCTS GRID */
 .products {
   max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 20px;
+  margin: 30px auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 30px;
+  gap: 25px;
 }
 
 /* CARD */
 .card {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.06);
   border-radius: 16px;
   padding: 14px;
   transition: 0.4s;
-  position: relative;
-  overflow: hidden;
 }
 
-/* HOVER EFFECT */
+/* HOVER */
 .card:hover {
-  transform: translateY(-10px) scale(1.03);
-  background: rgba(255,255,255,0.08);
+  transform: translateY(-8px);
+  background: rgba(255,255,255,0.09);
 }
 
 /* IMAGE */
 .card img {
   width: 100%;
-  height: 190px;
+  height: 170px;
   object-fit: cover;
   border-radius: 12px;
-  transition: 0.4s;
+  transition: 0.3s;
 }
 
 .card:hover img {
   transform: scale(1.05);
 }
 
-/* TITLE */
+/* TEXT */
 .card h3 {
-  margin-top: 12px;
-  font-size: 18px;
+  margin-top: 10px;
+  font-size: 17px;
 }
 
-/* PRICE */
 .card p {
   opacity: 0.7;
-  margin-top: 4px;
 }
 
-/* ADD BUTTON */
+/* BUTTON */
 .add-btn {
-  margin-top: 12px;
+  margin-top: 10px;
   width: 100%;
   padding: 10px;
   border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, #ff7a18, #ffb347);
+  background: linear-gradient(135deg, #f97316, #fb923c);
   color: white;
   font-weight: 600;
   cursor: pointer;
@@ -127,7 +135,7 @@ header select {
   transform: scale(1.05);
 }
 
-/* MODAL BACKDROP */
+/* MODAL */
 .modal {
   display: none;
   position: fixed;
@@ -136,40 +144,25 @@ header select {
   backdrop-filter: blur(10px);
 }
 
-/* MODAL BOX */
 .modal-content {
-  width: 400px;
+  width: 380px;
   margin: 100px auto;
   padding: 25px;
   border-radius: 16px;
-  background: rgba(30,40,60,0.9);
-  animation: fadeIn 0.3s ease;
+  background: rgba(30,41,59,0.95);
 }
 
-/* CART ITEMS */
-.cart-item {
-  display: flex;
-  justify-content: space-between;
-  margin: 12px 0;
-}
-
-/* CHECKOUT BUTTON */
+/* CHECKOUT */
 .checkout-btn {
   margin-top: 15px;
   width: 100%;
   padding: 12px;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-}
-
-/* ANIMATION */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95);}
-  to { opacity: 1; transform: scale(1);}
 }
 
 /* MOBILE */
@@ -178,8 +171,4 @@ header select {
     grid-template-columns: repeat(2,1fr);
   }
 
-  header {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-}
+  .header-inner {
