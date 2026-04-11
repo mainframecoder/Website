@@ -18,16 +18,26 @@ let currentPrice = "all";
 /* SAVE PRODUCTS FOR PRODUCT PAGE */
 localStorage.setItem("products", JSON.stringify(products));
 
+
+// ================= PRODUCTS =================
+
 function renderProducts(list = products) {
   const container = document.getElementById("products");
   container.innerHTML = "";
 
   list.forEach(p => {
     container.innerHTML += `
-      <div class="card" onclick="openProduct(${p.id})">
-        <img src="${p.img}">
+      <div class="card">
+
+        <img src="${p.img}" onclick="openProduct(${p.id})">
+
         <h3>${p.name}</h3>
         <p>$${p.price}</p>
+
+        <button class="add-btn" onclick="addToCart(${p.id})">
+          Add to Cart
+        </button>
+
       </div>
     `;
   });
@@ -40,6 +50,9 @@ function openProduct(id){
 function goHome(){
   window.location.href = "/";
 }
+
+
+// ================= FILTERS =================
 
 function filterCategory(val){
   currentCategory = val;
@@ -57,7 +70,7 @@ function applyFilters(){
 
     let price = true;
     if(currentPrice==="low") price = p.price < 50;
-    if(currentPrice==="mid") price = p.price <=100 && p.price>=50;
+    if(currentPrice==="mid") price = p.price >=50 && p.price<=100;
     if(currentPrice==="high") price = p.price >100;
 
     return cat && price;
@@ -65,6 +78,9 @@ function applyFilters(){
 
   renderProducts(filtered);
 }
+
+
+// ================= SEARCH =================
 
 function searchProducts(){
   const val = document.getElementById("search").value.toLowerCase();
@@ -76,30 +92,80 @@ function searchProducts(){
   renderProducts(filtered);
 }
 
-/* CART */
-function openCart(){document.getElementById("cartModal").style.display="block";}
-function closeCart(){document.getElementById("cartModal").style.display="none";}
+
+// ================= CART =================
 
 function addToCart(id){
-  cart[id] = (cart[id]||0)+1;
+  cart[id] = (cart[id] || 0) + 1;
   renderCart();
+}
+
+function openCart(){
+  document.getElementById("cartModal").style.display="block";
+}
+
+function closeCart(){
+  document.getElementById("cartModal").style.display="none";
 }
 
 function renderCart(){
   let html="";
   let total=0;
+  let count=0;
 
   Object.keys(cart).forEach(id=>{
-    let p=products.find(x=>x.id==id);
-    let qty=cart[id];
-    total += p.price*qty;
+    let p = products.find(x=>x.id==id);
+    let qty = cart[id];
 
-    html += `<p>${p.name} x ${qty}</p>`;
+    total += p.price * qty;
+    count += qty;
+
+    html += `
+      <div class="cart-item">
+        <span>${p.name} x ${qty}</span>
+      </div>
+    `;
   });
 
-  document.getElementById("cartItems").innerHTML=html;
-  document.getElementById("total").innerText="Total: $"+total;
+  document.getElementById("cartItems").innerHTML = html;
+  document.getElementById("total").innerText = "Total: $" + total;
+  document.getElementById("cartCount").innerText = count;
 }
 
-/* INIT */
+
+// ================= CHECKOUT =================
+
+function checkout(){
+  const email = document.getElementById("email").value;
+  const address = document.getElementById("address").value;
+
+  if(!email || !address){
+    alert("Enter email & address");
+    return;
+  }
+
+  let cartArray = Object.keys(cart).map(id => ({
+    id: parseInt(id),
+    qty: cart[id]
+  }));
+
+  fetch(API + "/payment/create-checkout-session", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      cart: cartArray,
+      email,
+      address
+    })
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    window.location.href = data.url;
+  })
+  .catch(()=>alert("Payment error"));
+}
+
+
+// ================= INIT =================
+
 renderProducts();
