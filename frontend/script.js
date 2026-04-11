@@ -13,8 +13,7 @@ let products = [
 
 let cart = {};
 
-localStorage.setItem("products", JSON.stringify(products));
-
+/* ---------- PRODUCTS ---------- */
 function renderProducts(list = products){
   const container = document.getElementById("products");
   container.innerHTML = "";
@@ -22,7 +21,7 @@ function renderProducts(list = products){
   list.forEach(p=>{
     container.innerHTML += `
       <div class="card">
-        <img src="${p.img}" onclick="openProduct(${p.id})">
+        <img src="${p.img}">
         <h3>${p.name}</h3>
         <p>$${p.price}</p>
         <button class="add-btn" onclick="addToCart(${p.id})">Add to Cart</button>
@@ -31,76 +30,91 @@ function renderProducts(list = products){
   });
 }
 
-function openProduct(id){
-  window.location.href = "product.html?id=" + id;
-}
-
-function goHome(){
-  window.location.href = "/";
-}
-
+/* ---------- SEARCH ---------- */
 function searchProducts(){
   let val = document.getElementById("search").value.toLowerCase();
-  let filtered = products.filter(p=>p.name.toLowerCase().includes(val));
+  let filtered = products.filter(p => p.name.toLowerCase().includes(val));
   renderProducts(filtered);
 }
 
-/* CART */
-function addToCart(id){
-  cart[id] = (cart[id] || 0) + 1;
-  renderCart();
+/* ---------- FILTER ---------- */
+function filterCategory(cat){
+  if(!cat) return renderProducts();
+
+  let filtered = products.filter(p => p.category === cat);
+  renderProducts(filtered);
 }
 
-function renderCart(){
-  let html="";
-  let total=0;
-  let count=0;
+/* ---------- CART ---------- */
+function addToCart(id){
+  cart[id] = (cart[id] || 0) + 1;
+  updateCartUI();
+}
+
+/* 🔥 FIXED CART UI */
+function updateCartUI(){
+  let itemsHTML = "";
+  let total = 0;
+  let count = 0;
 
   Object.keys(cart).forEach(id=>{
-    let p=products.find(x=>x.id==id);
-    let qty=cart[id];
+    let p = products.find(x=>x.id==id);
+    let qty = cart[id];
 
     total += p.price * qty;
     count += qty;
 
-    html += `<div class="cart-item">${p.name} x ${qty}</div>`;
+    itemsHTML += `
+      <div style="display:flex;justify-content:space-between;margin:10px 0;">
+        <span>${p.name} x ${qty}</span>
+        <span>$${p.price * qty}</span>
+      </div>
+    `;
   });
 
-  document.getElementById("cartItems").innerHTML = html;
+  document.getElementById("cartItems").innerHTML = itemsHTML || "Cart empty";
   document.getElementById("total").innerText = "Total: $" + total;
   document.getElementById("cartCount").innerText = count;
 }
 
+/* ---------- MODAL ---------- */
 function openCart(){
-  document.getElementById("cartModal").style.display="block";
+  document.getElementById("cartModal").style.display = "block";
 }
 
 function closeCart(){
-  document.getElementById("cartModal").style.display="none";
+  document.getElementById("cartModal").style.display = "none";
 }
 
-/* CHECKOUT */
+/* ---------- CHECKOUT ---------- */
 function checkout(){
-  let email=document.getElementById("email").value;
-  let address=document.getElementById("address").value;
+  let email = document.getElementById("email").value;
+  let address = document.getElementById("address").value;
 
   if(!email || !address){
-    alert("Enter details");
+    alert("Enter email & address");
     return;
   }
 
   let cartArray = Object.keys(cart).map(id=>({
-    id:parseInt(id),
-    qty:cart[id]
+    id: parseInt(id),
+    qty: cart[id]
   }));
 
-  fetch(API+"/payment/create-checkout-session",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({cart:cartArray,email,address})
+  fetch(API + "/payment/create-checkout-session", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({cart:cartArray, email, address})
   })
   .then(res=>res.json())
-  .then(data=>window.location.href=data.url);
+  .then(data=>{
+    window.location.href = data.url;
+  });
+}
+
+/* ---------- HOME ---------- */
+function goHome(){
+  window.location.href = "/";
 }
 
 /* INIT */
