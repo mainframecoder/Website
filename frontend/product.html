@@ -11,18 +11,21 @@
 
 <script>
 const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
+const id = parseInt(params.get("id"));
 
-const products = JSON.parse(localStorage.getItem("products")) || [];
+const products = JSON.parse(localStorage.getItem("products"));
 
-const p = products.find(x=>x.id==id);
+const p = products.find(x => x.id === id);
 
-document.getElementById("productDetail").innerHTML = `
-  <img src="${p.img}" style="width:300px">
-  <h1>${p.name}</h1>
-  <h2>$${p.price}</h2>
-  <button onclick="addToCart(${p.id})">Add to Cart</button>
-`;
+if(p){
+  document.getElementById("productDetail").innerHTML = `
+    <img src="${p.img}" style="width:300px;border-radius:10px">
+    <h1>${p.name}</h1>
+    <h2>$${p.price}</h2>
+  `;
+} else {
+  document.getElementById("productDetail").innerHTML = "<h2>Product not found</h2>";
+}
 </script>
 
 </body>
