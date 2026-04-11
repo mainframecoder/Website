@@ -12,11 +12,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def home():
+    return {"msg": "API running"}
+
 app.include_router(products.router, prefix="/products")
 app.include_router(payment.router, prefix="/payment")
 app.include_router(orders.router, prefix="/orders")
-
-
-@app.get("/")
-def home():
-    return {"status": "running"}
