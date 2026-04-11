@@ -1,17 +1,34 @@
 <!DOCTYPE html>
 <html>
-<body>
+<head>
+  <title>Track Order</title>
+</head>
 
-<h1>Track Order</h1>
+<body style="font-family:sans-serif;text-align:center;padding-top:100px">
+
+<h1>📦 Track Your Order</h1>
+
+<input id="orderId" placeholder="Enter Order ID"/>
+<button onclick="track()">Track</button>
+
+<p id="result"></p>
 
 <script>
-const id=prompt("Enter Order ID");
+function track() {
+  const id = document.getElementById("orderId").value;
 
-fetch(`https://website-9gq9.onrender.com/orders/${id}`)
-.then(r=>r.json())
-.then(d=>{
-  document.body.innerHTML+=`<h2>${d.status}</h2>`;
-});
+  fetch(`https://website-9gq9.onrender.com/orders/${id}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("result").innerHTML = `
+        <b>Status:</b> ${data.status} <br>
+        <b>Total:</b> $${data.total}
+      `;
+    })
+    .catch(() => {
+      document.getElementById("result").innerText = "Order not found";
+    });
+}
 </script>
 
 </body>
