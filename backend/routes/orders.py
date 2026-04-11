@@ -1,11 +1,15 @@
-from pydantic import BaseModel
-from typing import List, Optional
+from fastapi import APIRouter, HTTPException
+from db import ORDERS
 
-class CartItem(BaseModel):
-    id: int
-    qty: int
+# ✅ THIS IS REQUIRED
+router = APIRouter()
 
-class CheckoutRequest(BaseModel):
-    cart: List[CartItem]
-    email: Optional[str] = None
-    address: Optional[str] = None
+
+@router.get("/{order_id}")
+def get_order(order_id: str):
+    order = ORDERS.get(order_id)
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    return order
