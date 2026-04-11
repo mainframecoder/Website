@@ -7,24 +7,16 @@
 
 <body>
 
-<!-- NAVBAR -->
 <div class="navbar">
   <h2>🛒 My Store</h2>
 
-  <input type="text" id="search" placeholder="Search...">
-
-  <select id="filter">
-    <option value="all">All</option>
-    <option value="low">Under $50</option>
-    <option value="high">Above $50</option>
-  </select>
+  <input id="search" placeholder="Search products...">
 
   <div class="cart-icon" onclick="toggleCart()">
     🛒 <span id="cart-count">0</span>
   </div>
 </div>
 
-<!-- PRODUCTS -->
 <div id="products" class="grid"></div>
 
 <!-- CART -->
@@ -36,11 +28,8 @@
 
   <h3 id="total">Total: $0</h3>
 
-  <!-- ✅ ADDRESS FIELD -->
-  <input id="address" placeholder="Delivery Address" required />
-
-  <!-- ✅ EMAIL -->
-  <input id="email" placeholder="Email" />
+  <input id="address" placeholder="Delivery Address" required>
+  <input id="email" placeholder="Email">
 
   <button onclick="checkout()">Checkout</button>
 
