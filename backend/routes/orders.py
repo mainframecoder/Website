@@ -1,14 +1,11 @@
-from fastapi import APIRouter
+from pydantic import BaseModel
+from typing import List, Optional
 
-router = APIRouter()
+class CartItem(BaseModel):
+    id: int
+    qty: int
 
-ORDERS = []
-
-@router.post("/")
-def create_order(order: dict):
-    ORDERS.append(order)
-    return {"msg": "Order stored"}
-
-@router.get("/")
-def get_orders():
-    return ORDERS
+class CheckoutRequest(BaseModel):
+    cart: List[CartItem]
+    email: Optional[str] = None
+    address: Optional[str] = None
