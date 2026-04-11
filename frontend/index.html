@@ -7,19 +7,33 @@
 
 <body>
 
-<header>
-  <h1>🛒 My Store</h1>
+<header class="glass">
+  <h1 onclick="goHome()">🛒 My Store</h1>
 
   <input type="text" id="search" placeholder="Search..." onkeyup="searchProducts()">
+
+  <select onchange="filterCategory(this.value)">
+    <option value="all">All Categories</option>
+    <option value="clothing">Clothing</option>
+    <option value="footwear">Footwear</option>
+    <option value="accessories">Accessories</option>
+  </select>
+
+  <select onchange="filterPrice(this.value)">
+    <option value="all">All Prices</option>
+    <option value="low">Below $50</option>
+    <option value="mid">$50 - $100</option>
+    <option value="high">Above $100</option>
+  </select>
 
   <button onclick="openCart()">🛍 Cart (<span id="cartCount">0</span>)</button>
 </header>
 
 <div id="products" class="products"></div>
 
-<!-- 🔥 CART POPUP -->
+<!-- CART MODAL -->
 <div id="cartModal" class="modal">
-  <div class="modal-content">
+  <div class="modal-content glass">
     <span onclick="closeCart()" class="close">&times;</span>
     <h2>Your Cart</h2>
 
