@@ -12,32 +12,20 @@ let products = [
 ];
 
 let cart = {};
-let currentCategory = "all";
-let currentPrice = "all";
 
-/* SAVE PRODUCTS FOR PRODUCT PAGE */
 localStorage.setItem("products", JSON.stringify(products));
 
-
-// ================= PRODUCTS =================
-
-function renderProducts(list = products) {
+function renderProducts(list = products){
   const container = document.getElementById("products");
   container.innerHTML = "";
 
-  list.forEach(p => {
+  list.forEach(p=>{
     container.innerHTML += `
       <div class="card">
-
         <img src="${p.img}" onclick="openProduct(${p.id})">
-
         <h3>${p.name}</h3>
         <p>$${p.price}</p>
-
-        <button class="add-btn" onclick="addToCart(${p.id})">
-          Add to Cart
-        </button>
-
+        <button class="add-btn" onclick="addToCart(${p.id})">Add to Cart</button>
       </div>
     `;
   });
@@ -51,53 +39,36 @@ function goHome(){
   window.location.href = "/";
 }
 
-
-// ================= FILTERS =================
-
-function filterCategory(val){
-  currentCategory = val;
-  applyFilters();
-}
-
-function filterPrice(val){
-  currentPrice = val;
-  applyFilters();
-}
-
-function applyFilters(){
-  let filtered = products.filter(p => {
-    let cat = currentCategory === "all" || p.category === currentCategory;
-
-    let price = true;
-    if(currentPrice==="low") price = p.price < 50;
-    if(currentPrice==="mid") price = p.price >=50 && p.price<=100;
-    if(currentPrice==="high") price = p.price >100;
-
-    return cat && price;
-  });
-
-  renderProducts(filtered);
-}
-
-
-// ================= SEARCH =================
-
 function searchProducts(){
-  const val = document.getElementById("search").value.toLowerCase();
-
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(val)
-  );
-
+  let val = document.getElementById("search").value.toLowerCase();
+  let filtered = products.filter(p=>p.name.toLowerCase().includes(val));
   renderProducts(filtered);
 }
 
-
-// ================= CART =================
-
+/* CART */
 function addToCart(id){
   cart[id] = (cart[id] || 0) + 1;
   renderCart();
+}
+
+function renderCart(){
+  let html="";
+  let total=0;
+  let count=0;
+
+  Object.keys(cart).forEach(id=>{
+    let p=products.find(x=>x.id==id);
+    let qty=cart[id];
+
+    total += p.price * qty;
+    count += qty;
+
+    html += `<div class="cart-item">${p.name} x ${qty}</div>`;
+  });
+
+  document.getElementById("cartItems").innerHTML = html;
+  document.getElementById("total").innerText = "Total: $" + total;
+  document.getElementById("cartCount").innerText = count;
 }
 
 function openCart(){
@@ -108,64 +79,29 @@ function closeCart(){
   document.getElementById("cartModal").style.display="none";
 }
 
-function renderCart(){
-  let html="";
-  let total=0;
-  let count=0;
-
-  Object.keys(cart).forEach(id=>{
-    let p = products.find(x=>x.id==id);
-    let qty = cart[id];
-
-    total += p.price * qty;
-    count += qty;
-
-    html += `
-      <div class="cart-item">
-        <span>${p.name} x ${qty}</span>
-      </div>
-    `;
-  });
-
-  document.getElementById("cartItems").innerHTML = html;
-  document.getElementById("total").innerText = "Total: $" + total;
-  document.getElementById("cartCount").innerText = count;
-}
-
-
-// ================= CHECKOUT =================
-
+/* CHECKOUT */
 function checkout(){
-  const email = document.getElementById("email").value;
-  const address = document.getElementById("address").value;
+  let email=document.getElementById("email").value;
+  let address=document.getElementById("address").value;
 
   if(!email || !address){
-    alert("Enter email & address");
+    alert("Enter details");
     return;
   }
 
-  let cartArray = Object.keys(cart).map(id => ({
-    id: parseInt(id),
-    qty: cart[id]
+  let cartArray = Object.keys(cart).map(id=>({
+    id:parseInt(id),
+    qty:cart[id]
   }));
 
-  fetch(API + "/payment/create-checkout-session", {
+  fetch(API+"/payment/create-checkout-session",{
     method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      cart: cartArray,
-      email,
-      address
-    })
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({cart:cartArray,email,address})
   })
   .then(res=>res.json())
-  .then(data=>{
-    window.location.href = data.url;
-  })
-  .catch(()=>alert("Payment error"));
+  .then(data=>window.location.href=data.url);
 }
 
-
-// ================= INIT =================
-
+/* INIT */
 renderProducts();
