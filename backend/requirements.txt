@@ -1,5 +1,4 @@
 fastapi
 uvicorn
-pymongo
-python-dotenv
 stripe
+pydantic
