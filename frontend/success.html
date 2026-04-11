@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Payment Success</title>
+  <title>Success</title>
 </head>
 
 <body style="font-family:sans-serif;text-align:center;padding-top:100px">
 
-<h1>✅ Payment Successful</h1>
+<h1>🎉 Order Placed Successfully</h1>
 
-<p id="orderInfo">Loading order...</p>
+<p id="orderInfo"></p>
 
-<a href="/">Go back to store</a>
+<a href="/">Continue Shopping</a>
+<br><br>
+<a href="/track.html">Track Order</a>
 
 <script>
 const params = new URLSearchParams(window.location.search);
@@ -20,13 +22,10 @@ fetch(`https://website-9gq9.onrender.com/orders/${orderId}`)
   .then(res => res.json())
   .then(data => {
     document.getElementById("orderInfo").innerHTML = `
-      <b>Order ID:</b> ${data.id} <br>
-      <b>Total:</b> $${data.total} <br>
-      <b>Status:</b> ${data.status}
+      <h3>Order ID: ${data.id}</h3>
+      <p>Total: $${data.total}</p>
+      <p>Status: ${data.status}</p>
     `;
-  })
-  .catch(() => {
-    document.getElementById("orderInfo").innerText = "Error loading order";
   });
 </script>
 
