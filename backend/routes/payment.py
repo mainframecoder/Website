@@ -60,7 +60,7 @@ def create_checkout(data: CheckoutRequest):
             customer_email=data.email if data.email else None,
 
             # ✅ IMPORTANT FIX (NO .html)
-            success_url=f"{FRONTEND_URL}/success",
+            success_url=f"{FRONTEND_URL}/success.html",
             cancel_url=f"{FRONTEND_URL}",
         )
 
