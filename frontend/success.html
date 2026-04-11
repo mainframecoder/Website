@@ -2,31 +2,22 @@
 <html>
 <head>
   <title>Success</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
-<body style="font-family:sans-serif;text-align:center;padding-top:100px">
+<body style="display:flex;align-items:center;justify-content:center;height:100vh;">
 
-<h1>🎉 Order Placed Successfully</h1>
-
-<p id="orderInfo"></p>
-
-<a href="/">Continue Shopping</a>
-<br><br>
-<a href="/track.html">Track Order</a>
+<div style="text-align:center;">
+  <h1>✅ Payment Successful</h1>
+  <p>Your order has been placed.</p>
+  <br>
+  <button class="checkout-btn" onclick="goHome()">Go Home</button>
+</div>
 
 <script>
-const params = new URLSearchParams(window.location.search);
-const orderId = params.get("order_id");
-
-fetch(`https://website-9gq9.onrender.com/orders/${orderId}`)
-  .then(res => res.json())
-  .then(data => {
-    document.getElementById("orderInfo").innerHTML = `
-      <h3>Order ID: ${data.id}</h3>
-      <p>Total: $${data.total}</p>
-      <p>Status: ${data.status}</p>
-    `;
-  });
+function goHome(){
+  window.location.href = "/";
+}
 </script>
 
 </body>
