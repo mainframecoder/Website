@@ -1,24 +1,22 @@
 from fastapi import APIRouter, HTTPException
 import stripe
 import os
+import uuid
 
 from models import CheckoutRequest
-from db import PRODUCTS
+from db import PRODUCTS, ORDERS
 
 router = APIRouter()
 
-# ✅ Load env variables
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 
-# ✅ Set Stripe key
 stripe.api_key = STRIPE_SECRET_KEY
 
 
 @router.post("/create-checkout-session")
 def create_checkout(data: CheckoutRequest):
 
-    # 🚨 Safety checks
     if not STRIPE_SECRET_KEY:
         raise HTTPException(status_code=500, detail="Stripe key missing")
 
@@ -28,8 +26,8 @@ def create_checkout(data: CheckoutRequest):
     if not data.cart:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
-    # ✅ Build Stripe line items
     line_items = []
+    total = 0
 
     for item in data.cart:
         product = PRODUCTS.get(item.id)
@@ -37,13 +35,15 @@ def create_checkout(data: CheckoutRequest):
         if not product:
             continue
 
+        total += product["price"] * item.qty
+
         line_items.append({
             "price_data": {
                 "currency": "cad",
                 "product_data": {
                     "name": product["name"],
                 },
-                "unit_amount": int(product["price"] * 100),  # cents
+                "unit_amount": int(product["price"] * 100),
             },
             "quantity": item.qty,
         })
@@ -52,6 +52,16 @@ def create_checkout(data: CheckoutRequest):
         raise HTTPException(status_code=400, detail="Invalid cart items")
 
     try:
+        # ✅ Create order FIRST
+        order_id = str(uuid.uuid4())[:8]
+
+        ORDERS[order_id] = {
+            "id": order_id,
+            "items": [item.dict() for item in data.cart],
+            "total": total,
+            "status": "Processing"
+        }
+
         # ✅ Create Stripe session
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
@@ -59,8 +69,7 @@ def create_checkout(data: CheckoutRequest):
             mode="payment",
             customer_email=data.email if data.email else None,
 
-            # ✅ IMPORTANT FIX (NO .html)
-            success_url=f"{FRONTEND_URL}/success.html",
+            success_url=f"{FRONTEND_URL}/success.html?order_id={order_id}",
             cancel_url=f"{FRONTEND_URL}",
         )
 
