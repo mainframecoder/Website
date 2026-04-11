@@ -1,10 +1,11 @@
 from pydantic import BaseModel
+from typing import List, Optional
 
 class CartItem(BaseModel):
     id: int
     qty: int
 
 class CheckoutRequest(BaseModel):
-    cart: list[CartItem]
-    address: str
-    email: str
+    cart: List[CartItem]
+    email: Optional[str] = None
+    address: Optional[str] = None
