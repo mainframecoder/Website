@@ -25,6 +25,9 @@ let products = [
 
 let cart = {};
 
+
+// ================= PRODUCTS =================
+
 function renderProducts(list = products) {
   const container = document.getElementById("products");
   container.innerHTML = "";
@@ -41,14 +44,26 @@ function renderProducts(list = products) {
   });
 }
 
+
+// ================= CART =================
+
 function addToCart(id) {
   cart[id] = (cart[id] || 0) + 1;
+  renderCart();
+}
+
+function changeQty(id, delta) {
+  cart[id] += delta;
+
+  if (cart[id] <= 0) delete cart[id];
+
   renderCart();
 }
 
 function renderCart() {
   let html = "";
   let total = 0;
+  let count = 0;
 
   Object.keys(cart).forEach(id => {
     let p = products.find(x => x.id == id);
@@ -56,26 +71,64 @@ function renderCart() {
     let subtotal = p.price * qty;
 
     total += subtotal;
+    count += qty;
 
     html += `
-      <div>
-        ${p.name} (${qty}) - $${p.price} each → $${subtotal}
+      <div class="cart-item">
+        <div>
+          <b>${p.name}</b><br>
+          $${p.price} × ${qty} = $${subtotal}
+        </div>
+
+        <div>
+          <button class="qty-btn" onclick="changeQty(${id}, -1)">-</button>
+          ${qty}
+          <button class="qty-btn" onclick="changeQty(${id}, 1)">+</button>
+        </div>
       </div>
     `;
   });
 
   document.getElementById("cartItems").innerHTML = html;
   document.getElementById("total").innerText = "Total: $" + total;
+  document.getElementById("cartCount").innerText = count;
 }
+
+
+// ================= SEARCH =================
 
 function searchProducts() {
   const val = document.getElementById("search").value.toLowerCase();
-  const filtered = products.filter(p => p.name.toLowerCase().includes(val));
+
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(val)
+  );
+
   renderProducts(filtered);
 }
 
+
+// ================= CART MODAL =================
+
+function openCart() {
+  document.getElementById("cartModal").style.display = "block";
+}
+
+function closeCart() {
+  document.getElementById("cartModal").style.display = "none";
+}
+
+
+// ================= CHECKOUT =================
+
 function checkout() {
   const email = document.getElementById("email").value;
+  const address = document.getElementById("address").value;
+
+  if (!email || !address) {
+    alert("Please enter email and address");
+    return;
+  }
 
   let cartArray = Object.keys(cart).map(id => ({
     id: parseInt(id),
@@ -84,13 +137,23 @@ function checkout() {
 
   fetch(API + "/payment/create-checkout-session", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({cart: cartArray, email})
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      cart: cartArray,
+      email,
+      address
+    })
   })
   .then(res => res.json())
   .then(data => {
     window.location.href = data.url;
-  });
+  })
+  .catch(() => alert("Payment failed"));
 }
+
+
+// ================= INIT =================
 
 renderProducts();
