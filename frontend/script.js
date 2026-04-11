@@ -13,13 +13,11 @@ let products = [
 
 let cart = {};
 
-/* ---------- PRODUCTS ---------- */
+/* RENDER PRODUCTS */
 function renderProducts(list = products){
-  const container = document.getElementById("products");
-  container.innerHTML = "";
-
+  let html="";
   list.forEach(p=>{
-    container.innerHTML += `
+    html += `
       <div class="card">
         <img src="${p.img}">
         <h3>${p.name}</h3>
@@ -28,34 +26,33 @@ function renderProducts(list = products){
       </div>
     `;
   });
+  document.getElementById("products").innerHTML = html;
 }
 
-/* ---------- SEARCH ---------- */
+/* SEARCH */
 function searchProducts(){
   let val = document.getElementById("search").value.toLowerCase();
   let filtered = products.filter(p => p.name.toLowerCase().includes(val));
   renderProducts(filtered);
 }
 
-/* ---------- FILTER ---------- */
+/* FILTER */
 function filterCategory(cat){
   if(!cat) return renderProducts();
-
   let filtered = products.filter(p => p.category === cat);
   renderProducts(filtered);
 }
 
-/* ---------- CART ---------- */
+/* CART */
 function addToCart(id){
   cart[id] = (cart[id] || 0) + 1;
-  updateCartUI();
+  updateCart();
 }
 
-/* 🔥 FIXED CART UI */
-function updateCartUI(){
-  let itemsHTML = "";
-  let total = 0;
-  let count = 0;
+function updateCart(){
+  let items="";
+  let total=0;
+  let count=0;
 
   Object.keys(cart).forEach(id=>{
     let p = products.find(x=>x.id==id);
@@ -64,20 +61,15 @@ function updateCartUI(){
     total += p.price * qty;
     count += qty;
 
-    itemsHTML += `
-      <div style="display:flex;justify-content:space-between;margin:10px 0;">
-        <span>${p.name} x ${qty}</span>
-        <span>$${p.price * qty}</span>
-      </div>
-    `;
+    items += `<div>${p.name} x ${qty}</div>`;
   });
 
-  document.getElementById("cartItems").innerHTML = itemsHTML || "Cart empty";
+  document.getElementById("cartItems").innerHTML = items || "Empty";
   document.getElementById("total").innerText = "Total: $" + total;
   document.getElementById("cartCount").innerText = count;
 }
 
-/* ---------- MODAL ---------- */
+/* MODAL */
 function openCart(){
   document.getElementById("cartModal").style.display = "block";
 }
@@ -86,25 +78,25 @@ function closeCart(){
   document.getElementById("cartModal").style.display = "none";
 }
 
-/* ---------- CHECKOUT ---------- */
+/* CHECKOUT */
 function checkout(){
   let email = document.getElementById("email").value;
   let address = document.getElementById("address").value;
 
   if(!email || !address){
-    alert("Enter email & address");
+    alert("Enter details");
     return;
   }
 
   let cartArray = Object.keys(cart).map(id=>({
-    id: parseInt(id),
-    qty: cart[id]
+    id:parseInt(id),
+    qty:cart[id]
   }));
 
-  fetch(API + "/payment/create-checkout-session", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({cart:cartArray, email, address})
+  fetch(API+"/payment/create-checkout-session",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({cart:cartArray,email,address})
   })
   .then(res=>res.json())
   .then(data=>{
@@ -112,10 +104,15 @@ function checkout(){
   });
 }
 
-/* ---------- HOME ---------- */
+/* HOME */
 function goHome(){
   window.location.href = "/";
 }
+
+/* FIX CART CLICK */
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.getElementById("cartBtn").addEventListener("click", openCart);
+});
 
 /* INIT */
 renderProducts();
