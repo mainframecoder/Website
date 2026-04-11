@@ -1,8 +1,9 @@
 {
   "routes": [
+    { "src": "/success", "dest": "/success.html" },
+    { "src": "/track", "dest": "/track.html" },
     { "src": "/script.js", "dest": "/script.js" },
     { "src": "/style.css", "dest": "/style.css" },
-    { "src": "/success", "dest": "/success.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
