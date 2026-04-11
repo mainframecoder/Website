@@ -10,19 +10,15 @@ header {
   padding: 15px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 header input {
   padding: 8px;
-  width: 250px;
-}
-
-.container {
-  display: flex;
+  width: 200px;
 }
 
 .products {
-  width: 75%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
@@ -31,9 +27,14 @@ header input {
 
 .card {
   background: white;
-  padding: 10px;
   border-radius: 10px;
+  padding: 10px;
   text-align: center;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.03);
 }
 
 .card img {
@@ -42,19 +43,38 @@ header input {
   object-fit: cover;
 }
 
-.cart {
-  width: 25%;
-  background: #fff;
-  padding: 20px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+/* 🔥 MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.6);
 }
 
-button {
+.modal-content {
+  background: white;
+  width: 400px;
+  margin: 80px auto;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.close {
+  float:right;
+  cursor:pointer;
+  font-size:20px;
+}
+
+.cart-item {
+  display:flex;
+  justify-content: space-between;
+  margin:10px 0;
+}
+
+.qty-btn {
+  padding: 3px 8px;
   background: black;
-  color: white;
-  padding: 8px;
-  border: none;
-  cursor: pointer;
+  color:white;
+  cursor:pointer;
 }
