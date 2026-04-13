@@ -20,6 +20,7 @@ IMAGES = {
 
 names = ["T-Shirt", "Jeans", "Hoodie", "Sneakers", "Jacket", "Cap", "Watch"]
 
+# 🔥 GENERATE 50 PRODUCTS
 for i in range(1, 51):
     category = ["clothing", "footwear", "accessories"][i % 3]
     image = IMAGES[category][i % len(IMAGES[category])]
@@ -30,7 +31,20 @@ for i in range(1, 51):
         "name": name,
         "price": 20 + (i * 5),
         "category": category,
-        "image": image
+
+        # ✅ MAIN IMAGE
+        "image": image,
+
+        # ✅ MULTIPLE IMAGES (FOR PRODUCT PAGE)
+        "images": [
+            image,
+            IMAGES[category][(i + 1) % len(IMAGES[category])],
+            IMAGES[category][(i + 2) % len(IMAGES[category])]
+        ],
+
+        # ✅ EXTRA DETAILS (NEW)
+        "description": "Premium quality product. Comfortable, stylish, and durable.",
+        "sizes": ["S", "M", "L"]
     }
 
 # ================= ORDERS ================= #
