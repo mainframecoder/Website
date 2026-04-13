@@ -6,9 +6,10 @@
 
 <body>
 
-<header>
-  <div class="container header-inner">
-    <h1 onclick="goHome()">🛒 My Store</h1>
+<header class="header">
+  <h1 onclick="goHome()">🛒 My Store</h1>
+  <div>
+    Cart (<span id="cartCount">0</span>)
   </div>
 </header>
 
@@ -21,21 +22,55 @@
 const API = "https://website-9gq9.onrender.com";
 const email = localStorage.getItem("user");
 
-fetch(`${API}/orders/user/${email}`)
-.then(res=>res.json())
-.then(data=>{
-  let html = data.map(o=>`
-    <div class="box">
-      <p><b>ID:</b> ${o.id}</p>
-      <p><b>Status:</b> ${o.status}</p>
-      <p><b>Total:</b> $${o.total}</p>
-      <button onclick="downloadInvoice('${o.id}')">Invoice</button>
-    </div>
-  `).join("");
+/* CART COUNT */
+function updateCart(){
+  let cart = JSON.parse(localStorage.getItem("cart") || "{}");
+  let count = 0;
+  Object.values(cart).forEach(i=>count+=i.qty || i);
+  document.getElementById("cartCount").innerText = count;
+}
+updateCart();
 
-  document.getElementById("orders").innerHTML = html;
-});
+/* LOGIN CHECK */
+if(!email){
+  document.getElementById("orders").innerHTML = `
+    <p>Please login to view orders</p>
+  `;
+}else{
 
+  fetch(`${API}/orders/user/${email}`)
+  .then(res=>res.json())
+  .then(data=>{
+
+    if(!data || data.length === 0){
+      document.getElementById("orders").innerHTML = `
+        <p>No orders yet 🛍️</p>
+      `;
+      return;
+    }
+
+    let html = data.map(o=>`
+      <div class="order-card">
+        <p><b>ID:</b> ${o.id}</p>
+        <p><b>Status:</b> ${o.status}</p>
+        <p><b>Total:</b> $${o.total}</p>
+
+        <button onclick="downloadInvoice('${o.id}')">
+          Download Invoice
+        </button>
+      </div>
+    `).join("");
+
+    document.getElementById("orders").innerHTML = html;
+  })
+  .catch(()=>{
+    document.getElementById("orders").innerHTML = `
+      <p>Error loading orders</p>
+    `;
+  });
+}
+
+/* DOWNLOAD */
 function downloadInvoice(id){
   window.open(API + "/orders/invoice/" + id);
 }
