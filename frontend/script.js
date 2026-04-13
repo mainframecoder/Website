@@ -6,56 +6,63 @@ let cart = JSON.parse(localStorage.getItem("cart")) || {};
 /* INIT */
 window.onload = () => {
   loadProducts();
-  updateCartCount();
-
-  // 🔥 LIVE SYNC (important)
-  window.addEventListener("storage", updateCartCount);
+  updateCart();
 };
 
 /* LOAD */
 async function loadProducts() {
   const res = await fetch(API + "/products");
   const data = await res.json();
-
-  products = Array.isArray(data) ? data : Object.values(data);
+  products = Object.values(data);
   renderProducts(products);
 }
 
 /* RENDER */
 function renderProducts(list) {
-  const container = document.getElementById("products");
+  const el = document.getElementById("products");
 
-  container.innerHTML = list.map(p => `
-    <div class="card" onclick="openProduct(${p.id})">
-      <img src="${p.image}" onerror="this.src='https://via.placeholder.com/300'">
-      <h3>${p.name}</h3>
-      <p>$${p.price}</p>
+  el.innerHTML = list.map(p => {
+    const firstImg = Object.values(p.colors)[0][0];
 
-      <button onclick="event.stopPropagation(); addToCart(${p.id})">
-        Add to Cart
-      </button>
-    </div>
-  `).join("");
+    return `
+      <div class="card" onclick="openProduct(${p.id})">
+        <img src="${firstImg}">
+        <h3>${p.name}</h3>
+        <p>$${p.price}</p>
+        <button onclick="event.stopPropagation(); addToCart(${p.id})">Add</button>
+      </div>
+    `;
+  }).join("");
 }
 
 /* NAV */
-function openProduct(id) {
-  window.location.href = `product.html?id=${id}`;
+function openProduct(id){
+  window.location.href = `/product.html?id=${id}`;
 }
 
 /* CART */
-function addToCart(id) {
-  cart[id] = (cart[id] || 0) + 1;
+function addToCart(id, size="M", color="Red"){
+  cart[id] = {qty: (cart[id]?.qty || 0) + 1, size, color};
   localStorage.setItem("cart", JSON.stringify(cart));
-  updateCartCount();
+  updateCart();
+  toast("Added to cart");
 }
 
-function updateCartCount() {
+function updateCart(){
   const el = document.getElementById("cartCount");
-  if (!el) return;
+  if(!el) return;
 
-  const count = Object.values(JSON.parse(localStorage.getItem("cart") || "{}"))
-    .reduce((a, b) => a + b, 0);
-
+  let count = 0;
+  Object.values(cart).forEach(i => count += i.qty);
   el.innerText = count;
+}
+
+/* TOAST */
+function toast(msg){
+  let t = document.createElement("div");
+  t.className = "toast";
+  t.innerText = msg;
+  document.body.appendChild(t);
+
+  setTimeout(()=>t.remove(),2000);
 }
