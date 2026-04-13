@@ -1,6 +1,6 @@
 const API = "https://website-9gq9.onrender.com";
 
-/* ---------------- IMAGE MAP ---------------- */
+/* IMAGE MAP */
 const imageMap = {
   "T-Shirt": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
   "Jeans": "https://images.unsplash.com/photo-1541099649105-f69ad21f3246",
@@ -14,187 +14,153 @@ const imageMap = {
   "Sweatshirt": "https://images.unsplash.com/photo-1618354691321-e851c56960d1"
 };
 
-/* ---------------- STATE ---------------- */
 let products = [];
 let cart = JSON.parse(localStorage.getItem("cart")) || {};
 
-/* ---------------- SAVE CART ---------------- */
-function saveCart() {
+function saveCart(){
   localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-/* ---------------- FETCH PRODUCTS ---------------- */
+/* FETCH PRODUCTS */
 fetch(API + "/products")
   .then(res => res.json())
   .then(data => {
-
     products = Object.values(data).map(p => {
-      let baseName = p.name.split(" ")[0];
-
+      let base = p.name.split(" ")[0];
       return {
         ...p,
-        img: imageMap[baseName] || imageMap["T-Shirt"]
+        img: imageMap[base] || imageMap["T-Shirt"]
       };
     });
-
-    localStorage.setItem("products", JSON.stringify(products));
 
     renderProducts();
     updateCart();
   });
 
-/* ---------------- RENDER PRODUCTS ---------------- */
-function renderProducts(list = products) {
+/* RENDER */
+function renderProducts(list = products){
   let html = "";
-
-  list.forEach(p => {
+  list.forEach(p=>{
     html += `
       <div class="card" onclick="openProduct(${p.id})">
-        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300'">
+        <img src="${p.img}">
         <h3>${p.name}</h3>
         <p>$${p.price}</p>
-        <button class="add-btn" onclick="event.stopPropagation(); addToCart(${p.id})">
-          Add to Cart
-        </button>
+        <button class="add-btn" onclick="event.stopPropagation(); addToCart(${p.id})">Add</button>
       </div>
     `;
   });
-
   document.getElementById("products").innerHTML = html;
 }
 
-/* ---------------- SEARCH ---------------- */
-function searchProducts() {
+/* SEARCH */
+function searchProducts(){
   let val = document.getElementById("search").value.toLowerCase();
-  let filtered = products.filter(p => p.name.toLowerCase().includes(val));
-  renderProducts(filtered);
+  renderProducts(products.filter(p=>p.name.toLowerCase().includes(val)));
 }
 
-/* ---------------- FILTER ---------------- */
-function filterCategory(cat) {
-  if (!cat) return renderProducts();
-  let filtered = products.filter(p => p.category === cat);
-  renderProducts(filtered);
+/* FILTER */
+function filterCategory(cat){
+  if(!cat) return renderProducts();
+  renderProducts(products.filter(p=>p.category===cat));
 }
 
-/* ---------------- PRODUCT PAGE ---------------- */
-function openProduct(id) {
-  window.open(`product.html?id=${id}`, "_blank");
+/* PRODUCT PAGE */
+function openProduct(id){
+  window.open(`product.html?id=${id}`,"_blank");
 }
 
-/* ---------------- CART ---------------- */
-function addToCart(id) {
+/* CART */
+function addToCart(id){
   cart[id] = (cart[id] || 0) + 1;
   saveCart();
   updateCart();
 }
 
-function changeQty(id, delta) {
-  cart[id] += delta;
-  if (cart[id] <= 0) delete cart[id];
-  saveCart();
-  updateCart();
-}
+function updateCart(){
+  let total=0,count=0,items="";
+  Object.keys(cart).forEach(id=>{
+    let p = products.find(x=>x.id==id);
+    if(!p) return;
+    let q = cart[id];
+    total+=p.price*q;
+    count+=q;
 
-function updateCart() {
-  let items = "";
-  let total = 0;
-  let count = 0;
-
-  Object.keys(cart).forEach(id => {
-    let p = products.find(x => x.id == id);
-    if (!p) return;
-
-    let qty = cart[id];
-
-    total += p.price * qty;
-    count += qty;
-
-    items += `
-      <div class="cart-item">
-        <span>${p.name}</span>
-        <div>
-          <button onclick="changeQty(${id}, -1)">-</button>
-          ${qty}
-          <button onclick="changeQty(${id}, 1)">+</button>
-        </div>
-      </div>
-    `;
+    items+=`<div class="cart-item">${p.name} x ${q}</div>`;
   });
 
   document.getElementById("cartItems").innerHTML = items || "Empty";
-  document.getElementById("total").innerText = "Total: $" + total;
+  document.getElementById("total").innerText = "Total: $"+total;
   document.getElementById("cartCount").innerText = count;
 }
 
-/* ---------------- MODAL ---------------- */
-function openCart() {
-  document.getElementById("cartModal").style.display = "flex";
+/* MODAL */
+function openCart(){
+  document.getElementById("cartModal").style.display="flex";
+}
+function closeCart(){
+  document.getElementById("cartModal").style.display="none";
 }
 
-function closeCart() {
-  document.getElementById("cartModal").style.display = "none";
-}
+/* CHECKOUT */
+function checkout(){
+  let email=document.getElementById("email").value;
+  let address=document.getElementById("address").value;
 
-window.onclick = function (e) {
-  let modal = document.getElementById("cartModal");
-  if (e.target === modal) closeCart();
-};
-
-/* ---------------- CHECKOUT ---------------- */
-function checkout() {
-  let email = document.getElementById("email").value;
-  let address = document.getElementById("address").value;
-
-  if (!email || !address) {
-    alert("Enter details");
-    return;
-  }
-
-  let cartArray = Object.keys(cart).map(id => ({
-    id: parseInt(id),
-    qty: cart[id]
-  }));
-
-  fetch(API + "/payment/create-checkout-session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cart: cartArray, email, address })
+  fetch(API+"/payment/create-checkout-session",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      cart:Object.keys(cart).map(id=>({id:+id,qty:cart[id]})),
+      email,address
+    })
   })
-    .then(res => res.json())
-    .then(data => {
-      localStorage.removeItem("cart");
-      window.location.href = data.url;
-    });
+  .then(r=>r.json())
+  .then(d=>{
+    localStorage.removeItem("cart");
+    window.location.href=d.url;
+  });
 }
 
-/* ---------------- LOGIN ---------------- */
+/* LOGIN + SIGNUP */
 function login(){
-  let email = document.getElementById("loginEmail").value;
-  let password = document.getElementById("loginPass").value;
+  let email=loginEmail.value;
+  let password=loginPass.value;
 
-  fetch(API + "/auth/login", {
+  fetch(API+"/auth/login",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({email,password})
   })
-  .then(res=>res.json())
-  .then(()=>{
-    localStorage.setItem("user", email);
+  .then(res=>{
+    if(!res.ok) throw "err";
+    localStorage.setItem("user",email);
     alert("Logged in");
-  });
+  })
+  .catch(()=>alert("Invalid login"));
 }
 
-/* ---------------- NAVIGATION ---------------- */
+function signup(){
+  fetch(API+"/auth/register",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      email:loginEmail.value,
+      password:loginPass.value
+    })
+  })
+  .then(()=>alert("Account created"));
+}
+
 function goOrders(){
-  window.location.href = "orders.html";
+  window.location.href="orders.html";
 }
 
 function goHome(){
-  window.location.href = "/";
+  window.location.href="/";
 }
 
-/* ---------------- INIT ---------------- */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("cartBtn").addEventListener("click", openCart);
+/* INIT */
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("cartBtn").addEventListener("click",openCart);
 });
