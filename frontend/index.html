@@ -21,11 +21,15 @@
       <option value="accessories">Accessories</option>
     </select>
 
-    <!-- LOGIN -->
-    <input id="loginEmail" placeholder="Email">
-    <input id="loginPass" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <button onclick="goOrders()">Orders</button>
+    <!-- AUTH -->
+    <div class="auth-section">
+      <input id="loginEmail" placeholder="Email">
+      <input id="loginPass" type="password" placeholder="Password">
+
+      <button class="btn-primary" onclick="login()">Login</button>
+      <button class="btn-secondary" onclick="signup()">Sign Up</button>
+      <button class="btn-secondary" onclick="goOrders()">Orders</button>
+    </div>
 
     <button class="cart-btn" id="cartBtn">
       🛒 Cart (<span id="cartCount">0</span>)
