@@ -33,12 +33,21 @@ for i in range(1, 51):
         "price": 20 + (i * 5),
         "category": category,
 
+        # 👇 MAIN IMAGE
         "image": imgs[0],
+
+        # 👇 MULTI IMAGES
         "images": imgs,
 
+        # 👇 FIXED: COLOR → IMAGE MAPPING
+        "color_images": {
+            "Black": imgs,
+            "Blue": imgs[::-1],
+            "Red": imgs
+        },
+
         "description": "Premium product. Stylish and durable.",
-        "sizes": ["S", "M", "L"],
-        "colors": ["Black", "Blue", "Red"]
+        "sizes": ["S", "M", "L"]
     }
 
 # ================= ORDERS ================= #
