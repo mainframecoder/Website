@@ -5,6 +5,8 @@ from reportlab.pdfgen import canvas
 
 router = APIRouter()
 
+
+# GET SINGLE ORDER
 @router.get("/{order_id}")
 def get_order(order_id: str):
     order = ORDERS.get(order_id)
