@@ -30,6 +30,17 @@
 </div>
 
 <script>
+const API = "https://website-9gq9.onrender.com";
+
+/* AUTO-FILL ORDER ID FROM URL */
+const params = new URLSearchParams(window.location.search);
+const orderIdFromUrl = params.get("order_id");
+
+if(orderIdFromUrl){
+  document.getElementById("orderId").value = orderIdFromUrl;
+  track(); // auto fetch
+}
+
 function goHome(){
   window.location.href = "/";
 }
@@ -37,12 +48,33 @@ function goHome(){
 function track() {
   const id = document.getElementById("orderId").value;
 
-  fetch(`https://website-9gq9.onrender.com/orders/${id}`)
+  if(!id){
+    alert("Enter Order ID");
+    return;
+  }
+
+  fetch(`${API}/orders/${id}`)
     .then(res => res.json())
     .then(data => {
+
+      if(data.error){
+        document.getElementById("result").innerText = "Order not found";
+        return;
+      }
+
+      let items = data.items.map(i => `
+        <div style="margin-bottom:6px;">
+          Product ID: ${i.id} | Qty: ${i.qty}
+        </div>
+      `).join("");
+
       document.getElementById("result").innerHTML = `
-        <p><b>Status:</b> ${data.status}</p>
-        <p><b>Total:</b> $${data.total}</p>
+        <div style="background:#1e293b;padding:20px;border-radius:12px;">
+          <p><b>Status:</b> ${data.status}</p>
+          <p><b>Total:</b> $${data.total}</p>
+          <h3 style="margin-top:10px;">Items:</h3>
+          ${items}
+        </div>
       `;
     })
     .catch(() => {
