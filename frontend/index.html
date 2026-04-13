@@ -26,12 +26,13 @@
       <input id="loginEmail" placeholder="Email">
       <input id="loginPass" type="password" placeholder="Password">
 
-      <button class="btn-primary" onclick="login()">Login</button>
-      <button class="btn-secondary" onclick="signup()">Sign Up</button>
-      <button class="btn-secondary" onclick="goOrders()">Orders</button>
+      <button onclick="login()">Login</button>
+      <button onclick="signup()">Sign Up</button>
+      <button onclick="goOrders()">Orders</button>
     </div>
 
-    <button class="cart-btn" id="cartBtn">
+    <!-- CART -->
+    <button class="cart-btn" onclick="openCart()">
       Cart (<span id="cartCount">0</span>)
     </button>
 
@@ -42,7 +43,7 @@
   <div class="products" id="products"></div>
 </div>
 
-<!-- CART -->
+<!-- CART MODAL -->
 <div id="cartModal" class="modal">
   <div class="modal-content">
 
@@ -56,12 +57,22 @@
     <input id="address" placeholder="Delivery Address">
     <input id="email" placeholder="Email">
 
-    <button class="checkout-btn" onclick="checkout()">Checkout</button>
+    <button onclick="checkout()">Checkout</button>
 
   </div>
 </div>
 
 <script src="script.js"></script>
 
-</body>
-</html>
+<script>
+/* NAV */
+function goHome(){
+  window.location.href = "/";
+}
+
+function goOrders(){
+  window.location.href = "orders.html";
+}
+
+/* CART MODAL */
+function openCart
