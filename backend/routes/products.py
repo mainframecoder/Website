@@ -6,17 +6,11 @@ router = APIRouter()
 
 @router.get("/")
 def get_products():
-    """
-    Returns all products
-    """
     return PRODUCTS
 
 
 @router.get("/{product_id}")
 def get_product(product_id: int):
-    """
-    Returns a single product by ID
-    """
     product = PRODUCTS.get(product_id)
 
     if not product:
