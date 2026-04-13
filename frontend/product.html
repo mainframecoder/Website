@@ -10,6 +10,7 @@
 <header>
   <div class="container header-inner">
     <h1 onclick="goHome()">My Store</h1>
+    <div id="cart">Cart (<span id="cartCount">0</span>)</div>
   </div>
 </header>
 
@@ -21,33 +22,36 @@ const API = "https://website-9gq9.onrender.com";
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
 
-if (!id) {
-  document.getElementById("productDetail").innerHTML = "Invalid product";
-}
+let cart = JSON.parse(localStorage.getItem("cart")) || {};
+updateCart();
 
 /* FETCH PRODUCT */
 fetch(`${API}/products/${id}`)
   .then(res => res.json())
   .then(p => {
 
-    if (!p || p.error) {
-      document.getElementById("productDetail").innerHTML = "Product not found";
-      return;
-    }
+    if (!p) return;
+
+    let images = (p.images || [p.image]).map(img =>
+      `<img src="${img}" 
+            style="width:80px;margin:5px;cursor:pointer"
+            onclick="changeMain('${img}')">`
+    ).join("");
 
     document.getElementById("productDetail").innerHTML = `
       <div style="display:flex;gap:40px;margin-top:50px;flex-wrap:wrap;">
 
         <div>
-          <img src="${p.image}" style="width:350px;border-radius:10px"
-               onerror="this.src='https://via.placeholder.com/400'">
+          <img id="mainImg" src="${p.images ? p.images[0] : p.image}" 
+               style="width:350px;border-radius:10px">
+          <div>${images}</div>
         </div>
 
         <div>
           <h1>${p.name}</h1>
           <h2>$${p.price}</h2>
 
-          <p>Premium quality product.</p>
+          <p>Premium quality product. Comfortable and stylish.</p>
 
           <label>Select Size:</label>
           <select>
@@ -67,11 +71,20 @@ fetch(`${API}/products/${id}`)
     `;
   });
 
+function changeMain(src){
+  document.getElementById("mainImg").src = src;
+}
+
 function addToCart(id){
-  let cart = JSON.parse(localStorage.getItem("cart")) || {};
   cart[id] = (cart[id] || 0) + 1;
   localStorage.setItem("cart", JSON.stringify(cart));
+  updateCart();
   alert("Added to cart");
+}
+
+function updateCart(){
+  document.getElementById("cartCount").innerText =
+    Object.values(cart).reduce((a,b)=>a+b,0);
 }
 
 function goHome(){
