@@ -13,33 +13,17 @@
   </div>
 </header>
 
-<div class="container" style="display:flex;justify-content:center;align-items:center;height:80vh;">
+<div class="container" style="margin-top:80px;text-align:center;">
+  <h1>📦 Track Your Order</h1>
 
-  <div class="box" style="text-align:center; width:400px;">
+  <input id="orderId" placeholder="Enter Order ID">
+  <button class="checkout-btn" onclick="track()">Track</button>
 
-    <h1>📦 Track Your Order</h1>
-
-    <input id="orderId" placeholder="Enter Order ID">
-
-    <button class="checkout-btn" onclick="track()">Track</button>
-
-    <div id="result" style="margin-top:20px;"></div>
-
-  </div>
-
+  <div id="result" style="margin-top:20px;"></div>
 </div>
 
 <script>
 const API = "https://website-9gq9.onrender.com";
-
-/* AUTO-FILL ORDER ID FROM URL */
-const params = new URLSearchParams(window.location.search);
-const orderIdFromUrl = params.get("order_id");
-
-if(orderIdFromUrl){
-  document.getElementById("orderId").value = orderIdFromUrl;
-  track(); // auto fetch
-}
 
 function goHome(){
   window.location.href = "/";
@@ -48,39 +32,26 @@ function goHome(){
 function track() {
   const id = document.getElementById("orderId").value;
 
-  if(!id){
-    alert("Enter Order ID");
-    return;
-  }
-
   fetch(`${API}/orders/${id}`)
     .then(res => res.json())
     .then(data => {
 
-      if(data.error){
-        document.getElementById("result").innerText = "Order not found";
-        return;
-      }
-
       let items = data.items.map(i => `
-        <div style="margin-bottom:6px;">
-          Product ID: ${i.id} | Qty: ${i.qty}
-        </div>
+        <div>Product ${i.id} x ${i.qty}</div>
       `).join("");
 
       document.getElementById("result").innerHTML = `
-        <div style="background:#1e293b;padding:20px;border-radius:12px;">
-          <p><b>Status:</b> ${data.status}</p>
-          <p><b>Total:</b> $${data.total}</p>
-          <h3 style="margin-top:10px;">Items:</h3>
+        <div class="box">
+          <p>Status: ${data.status}</p>
+          <p>Total: $${data.total}</p>
           ${items}
         </div>
       `;
-    })
-    .catch(() => {
-      document.getElementById("result").innerText = "Order not found";
     });
 }
+
+/* LIVE REFRESH */
+setInterval(track, 5000);
 </script>
 
 </body>
