@@ -4,17 +4,14 @@
   <title>Product</title>
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<header>
-  <div style="display:flex;justify-content:space-between;padding:20px">
-    <h1 onclick="goHome()">My Store</h1>
-    <div>Cart (<span id="cartCount">0</span>)</div>
-  </div>
+<header class="header">
+  <h1 onclick="location.href='/'">My Store</h1>
+  <div>Cart (<span id="cartCount">0</span>)</div>
 </header>
 
-<div id="productDetail"></div>
+<div id="product"></div>
 
 <script>
 const API = "https://website-9gq9.onrender.com";
@@ -22,28 +19,28 @@ let cart = JSON.parse(localStorage.getItem("cart")) || {};
 
 updateCart();
 
-/* LOAD PRODUCT */
-const id = new URLSearchParams(window.location.search).get("id");
+const id = new URLSearchParams(location.search).get("id");
 
-fetch(`${API}/products/${id}`)
-  .then(res => res.json())
-  .then(p => {
+fetch(API + "/products/" + id)
+.then(r=>r.json())
+.then(p=>{
+  let color = "Red";
+  let size = "M";
 
-    let images = p.images.map(img =>
-      `<img src="${img}" style="width:70px;margin:5px;cursor:pointer"
-            onclick="change('${img}')">`
-    ).join("");
+  render(p, color);
 
-    let colors = p.colors.map(c =>
-      `<option>${c}</option>`
-    ).join("");
+  function render(p, color){
+    let imgs = p.colors[color];
 
-    document.getElementById("productDetail").innerHTML = `
-      <div style="display:flex;gap:40px;padding:40px">
+    document.getElementById("product").innerHTML = `
+      <div class="product">
 
         <div>
-          <img id="main" src="${p.images[0]}" style="width:350px">
-          <div>${images}</div>
+          <img id="main" src="${imgs[0]}" class="main-img">
+
+          <div class="thumbs">
+            ${imgs.map(i=>`<img src="${i}" onclick="change('${i}')">`).join("")}
+          </div>
         </div>
 
         <div>
@@ -52,40 +49,38 @@ fetch(`${API}/products/${id}`)
 
           <p>${p.description}</p>
 
-          <label>Size:</label>
-          <select>${p.sizes.map(s=>`<option>${s}</option>`).join("")}</select>
+          <label>Size</label>
+          <select onchange="size=this.value">
+            ${p.sizes.map(s=>`<option>${s}</option>`).join("")}
+          </select>
 
-          <br><br>
+          <label>Color</label>
+          <select onchange="color=this.value;render(p,color)">
+            ${Object.keys(p.colors).map(c=>`<option>${c}</option>`).join("")}
+          </select>
 
-          <label>Color:</label>
-          <select>${colors}</select>
-
-          <br><br>
-
-          <button onclick="add(${p.id})">Add to Cart</button>
+          <button onclick="add(${p.id})" class="btn">Add to Cart</button>
         </div>
 
       </div>
     `;
-  });
+  }
+});
 
 function change(src){
   document.getElementById("main").src = src;
 }
 
 function add(id){
-  cart[id] = (cart[id] || 0) + 1;
+  cart[id] = {qty:(cart[id]?.qty||0)+1};
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCart();
 }
 
 function updateCart(){
-  document.getElementById("cartCount").innerText =
-    Object.values(cart).reduce((a,b)=>a+b,0);
-}
-
-function goHome(){
-  window.location.href = "/";
+  let c=0;
+  Object.values(cart).forEach(i=>c+=i.qty);
+  document.getElementById("cartCount").innerText=c;
 }
 </script>
 
