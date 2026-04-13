@@ -7,7 +7,7 @@ let cart = JSON.parse(localStorage.getItem("cart")) || {};
 window.onload = () => {
   loadProducts();
 
-  let user = localStorage.getItem("user");
+  const user = localStorage.getItem("user");
   if (user && document.getElementById("loginEmail")) {
     document.getElementById("loginEmail").value = user;
   }
@@ -21,7 +21,9 @@ async function loadProducts() {
 
     console.log("Products:", data);
 
-    products = Array.isArray(data) ? data : Object.values(data); // FIX
+    // 🔥 FIX: handle object response
+    products = Array.isArray(data) ? data : Object.values(data);
+
     renderProducts(products);
 
   } catch (err) {
@@ -29,15 +31,14 @@ async function loadProducts() {
   }
 }
 
-/* ================= RENDER ================= */
+/* ================= RENDER PRODUCTS ================= */
 function renderProducts(list) {
   const container = document.getElementById("products");
-
   if (!container) return;
 
   container.innerHTML = list.map(p => `
     <div class="card" onclick="openProduct(${p.id})">
-      <img src="${p.image || 'https://via.placeholder.com/300'}">
+      <img src="${p.image}">
       <h3>${p.name}</h3>
       <p>$${p.price}</p>
 
@@ -70,7 +71,7 @@ function updateCartCount() {
   const el = document.getElementById("cartCount");
   if (!el) return;
 
-  let count = Object.values(cart).reduce((a, b) => a + b, 0);
+  const count = Object.values(cart).reduce((a, b) => a + b, 0);
   el.innerText = count;
 }
 
@@ -117,7 +118,7 @@ async function login() {
 
   } catch (err) {
     console.error(err);
-    alert("Error logging in");
+    alert("Login error");
   }
 }
 
@@ -142,6 +143,6 @@ async function signup() {
 
   } catch (err) {
     console.error(err);
-    alert("Error signing up");
+    alert("Signup error");
   }
 }
