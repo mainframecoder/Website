@@ -163,4 +163,12 @@ function goHome(){
 /* INIT */
 document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("cartBtn").addEventListener("click",openCart);
+
+  /* AUTO FILL EMAIL AFTER LOGIN */
+document.addEventListener("DOMContentLoaded", () => {
+  let user = localStorage.getItem("user");
+  if(user && document.getElementById("loginEmail")){
+    document.getElementById("loginEmail").value = user;
+  }
+});
 });
