@@ -38,7 +38,7 @@ function renderProducts(list) {
 
   container.innerHTML = list.map(p => `
     <div class="card" onclick="openProduct(${p.id})">
-      <img src="${p.image}">
+      <img src="${p.images ? p.images[0] : p.image}">
       <h3>${p.name}</h3>
       <p>$${p.price}</p>
 
