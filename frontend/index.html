@@ -35,17 +35,19 @@
 <!-- CART MODAL -->
 <div id="cartModal" class="modal">
   <div class="modal-content">
+
+    <span class="close-btn" onclick="closeCart()">✖</span>
+
     <h2>Your Cart</h2>
 
     <div id="cartItems"></div>
     <h3 id="total"></h3>
 
-    <input id="address" placeholder="Delivery Address"><br><br>
-    <input id="email" placeholder="Email"><br><br>
+    <input id="address" placeholder="Delivery Address">
+    <input id="email" placeholder="Email">
 
     <button class="checkout-btn" onclick="checkout()">Checkout</button>
-    <br><br>
-    <button onclick="closeCart()">Close</button>
+
   </div>
 </div>
 
