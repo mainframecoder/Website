@@ -9,3 +9,8 @@ class CheckoutRequest(BaseModel):
     cart: List[CartItem]
     email: Optional[str] = None
     address: Optional[str] = None
+
+# NEW
+class User(BaseModel):
+    email: str
+    password: str
