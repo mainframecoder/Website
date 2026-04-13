@@ -2,7 +2,6 @@
 
 PRODUCTS = {}
 
-# base images by category
 IMAGES = {
     "clothing": [
         "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=500",
@@ -21,7 +20,6 @@ IMAGES = {
 
 names = ["T-Shirt", "Jeans", "Hoodie", "Sneakers", "Jacket", "Cap", "Watch"]
 
-# generate 50 products
 for i in range(1, 51):
     category = ["clothing", "footwear", "accessories"][i % 3]
     image = IMAGES[category][i % len(IMAGES[category])]
@@ -38,3 +36,7 @@ for i in range(1, 51):
 # ================= ORDERS ================= #
 
 ORDERS = []
+
+# ================= USERS ================= #
+
+USERS = {}
