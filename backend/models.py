@@ -1,16 +1,43 @@
-from pydantic import BaseModel
-from typing import List, Optional
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship
+from db import Base
 
-class CartItem(BaseModel):
-    id: int
-    qty: int
+class User(Base):
+    __tablename__ = "users"
 
-class CheckoutRequest(BaseModel):
-    cart: List[CartItem]
-    email: Optional[str] = None
-    address: Optional[str] = None
+    id = Column(Integer, primary_key=True)
+    email = Column(String, unique=True)
+    password = Column(String)
 
-# NEW
-class User(BaseModel):
-    email: str
-    password: str
+
+class Product(Base):
+    __tablename__ = "products"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    description = Column(String)
+
+    variants = relationship("Variant", back_populates="product")
+
+
+class Variant(Base):
+    __tablename__ = "variants"
+
+    id = Column(Integer, primary_key=True)
+    product_id = Column(Integer, ForeignKey("products.id"))
+
+    color = Column(String)
+    size = Column(String)
+    price = Column(Float)
+    image = Column(String)
+
+    product = relationship("Product", back_populates="variants")
+
+
+class Order(Base):
+    __tablename__ = "orders"
+
+    id = Column(Integer, primary_key=True)
+    email = Column(String)
+    status = Column(String)
+    total = Column(Float)
