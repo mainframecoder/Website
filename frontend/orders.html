@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <div class="container header-inner">
+    <h1 onclick="goHome()">🛒 My Store</h1>
+  </div>
+</header>
+
+<div class="container">
+  <h2>Your Orders</h2>
+  <div id="orders"></div>
+</div>
+
+<script>
+const API = "https://website-9gq9.onrender.com";
+const email = localStorage.getItem("user");
+
+fetch(`${API}/orders/user/${email}`)
+.then(res=>res.json())
+.then(data=>{
+  let html = data.map(o=>`
+    <div class="box">
+      <p><b>ID:</b> ${o.id}</p>
+      <p><b>Status:</b> ${o.status}</p>
+      <p><b>Total:</b> $${o.total}</p>
+      <button onclick="downloadInvoice('${o.id}')">Invoice</button>
+    </div>
+  `).join("");
+
+  document.getElementById("orders").innerHTML = html;
+});
+
+function downloadInvoice(id){
+  window.open(API + "/orders/invoice/" + id);
+}
+
+function goHome(){
+  window.location.href = "/";
+}
+</script>
+
+</body>
+</html>
