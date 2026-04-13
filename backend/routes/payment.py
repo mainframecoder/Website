@@ -52,17 +52,17 @@ def create_checkout(data: CheckoutRequest):
         raise HTTPException(status_code=400, detail="Invalid cart items")
 
     try:
-        # ✅ Create order FIRST
         order_id = str(uuid.uuid4())[:8]
 
+        # ✅ UPDATED ORDER STRUCTURE
         ORDERS[order_id] = {
             "id": order_id,
             "items": [item.dict() for item in data.cart],
             "total": total,
-            "status": "Processing"
+            "status": "Processing",
+            "email": data.email
         }
 
-        # ✅ Create Stripe session
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=line_items,
