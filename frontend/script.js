@@ -1,6 +1,6 @@
 const API = "https://website-9gq9.onrender.com";
 
-/* ---------------- IMAGE MAP (NO BROKEN IMAGES) ---------------- */
+/* ---------------- IMAGE MAP ---------------- */
 const imageMap = {
   "T-Shirt": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
   "Jeans": "https://images.unsplash.com/photo-1541099649105-f69ad21f3246",
@@ -23,7 +23,7 @@ function saveCart() {
   localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-/* ---------------- FETCH PRODUCTS (FROM BACKEND 50) ---------------- */
+/* ---------------- FETCH PRODUCTS ---------------- */
 fetch(API + "/products")
   .then(res => res.json())
   .then(data => {
@@ -53,7 +53,9 @@ function renderProducts(list = products) {
         <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300'">
         <h3>${p.name}</h3>
         <p>$${p.price}</p>
-        <button class="add-btn" onclick="event.stopPropagation(); addToCart(${p.id})">Add to Cart</button>
+        <button class="add-btn" onclick="event.stopPropagation(); addToCart(${p.id})">
+          Add to Cart
+        </button>
       </div>
     `;
   });
@@ -164,6 +166,32 @@ function checkout() {
       localStorage.removeItem("cart");
       window.location.href = data.url;
     });
+}
+
+/* ---------------- LOGIN ---------------- */
+function login(){
+  let email = document.getElementById("loginEmail").value;
+  let password = document.getElementById("loginPass").value;
+
+  fetch(API + "/auth/login", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({email,password})
+  })
+  .then(res=>res.json())
+  .then(()=>{
+    localStorage.setItem("user", email);
+    alert("Logged in");
+  });
+}
+
+/* ---------------- NAVIGATION ---------------- */
+function goOrders(){
+  window.location.href = "orders.html";
+}
+
+function goHome(){
+  window.location.href = "/";
 }
 
 /* ---------------- INIT ---------------- */
