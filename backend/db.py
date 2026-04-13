@@ -1,9 +1,14 @@
-PRODUCTS = {
-    1: {"name": "Classic T-Shirt", "price": 25},
-    2: {"name": "Blue Jeans", "price": 60},
-    3: {"name": "Hoodie", "price": 45},
-    4: {"name": "Sneakers", "price": 120},
-}
+PRODUCTS = {}
 
-# ✅ Store orders (in-memory)
+names = ["T-Shirt", "Jeans", "Hoodie", "Sneakers", "Jacket", "Cap", "Watch"]
+categories = ["clothing", "footwear", "accessories"]
+
+for i in range(1, 51):
+    PRODUCTS[i] = {
+        "id": i,
+        "name": f"{names[i % len(names)]} {i}",
+        "price": 20 + (i % 10) * 10,
+        "category": categories[i % 3]
+    }
+
 ORDERS = {}
