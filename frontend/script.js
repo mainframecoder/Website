@@ -3,42 +3,31 @@ const API = "https://website-9gq9.onrender.com";
 let products = [];
 let cart = JSON.parse(localStorage.getItem("cart")) || {};
 
-/* ================= INIT ================= */
+/* INIT */
 window.onload = () => {
   loadProducts();
+  updateCartCount();
 
-  const user = localStorage.getItem("user");
-  if (user && document.getElementById("loginEmail")) {
-    document.getElementById("loginEmail").value = user;
-  }
+  // 🔥 LIVE SYNC (important)
+  window.addEventListener("storage", updateCartCount);
 };
 
-/* ================= LOAD PRODUCTS ================= */
+/* LOAD */
 async function loadProducts() {
-  try {
-    const res = await fetch(API + "/products");
-    const data = await res.json();
+  const res = await fetch(API + "/products");
+  const data = await res.json();
 
-    console.log("Products:", data);
-
-    // 🔥 FIX: handle object response
-    products = Array.isArray(data) ? data : Object.values(data);
-
-    renderProducts(products);
-
-  } catch (err) {
-    console.error("Error loading products:", err);
-  }
+  products = Array.isArray(data) ? data : Object.values(data);
+  renderProducts(products);
 }
 
-/* ================= RENDER PRODUCTS ================= */
+/* RENDER */
 function renderProducts(list) {
   const container = document.getElementById("products");
-  if (!container) return;
 
   container.innerHTML = list.map(p => `
     <div class="card" onclick="openProduct(${p.id})">
-      <img src="${p.images ? p.images[0] : p.image}">
+      <img src="${p.image}" onerror="this.src='https://via.placeholder.com/300'">
       <h3>${p.name}</h3>
       <p>$${p.price}</p>
 
@@ -47,20 +36,14 @@ function renderProducts(list) {
       </button>
     </div>
   `).join("");
-
-  updateCartCount();
 }
 
-/* ================= PRODUCT NAV ================= */
+/* NAV */
 function openProduct(id) {
-  window.open(`product.html?id=${id}`, "_blank");
+  window.location.href = `product.html?id=${id}`;
 }
 
-function goHome() {
-  window.location.href = "/";
-}
-
-/* ================= CART ================= */
+/* CART */
 function addToCart(id) {
   cart[id] = (cart[id] || 0) + 1;
   localStorage.setItem("cart", JSON.stringify(cart));
@@ -71,78 +54,8 @@ function updateCartCount() {
   const el = document.getElementById("cartCount");
   if (!el) return;
 
-  const count = Object.values(cart).reduce((a, b) => a + b, 0);
+  const count = Object.values(JSON.parse(localStorage.getItem("cart") || "{}"))
+    .reduce((a, b) => a + b, 0);
+
   el.innerText = count;
-}
-
-/* ================= SEARCH ================= */
-function searchProducts() {
-  const q = document.getElementById("search").value.toLowerCase();
-
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(q)
-  );
-
-  renderProducts(filtered);
-}
-
-/* ================= FILTER ================= */
-function filterCategory(cat) {
-  if (!cat) return renderProducts(products);
-
-  const filtered = products.filter(p => p.category === cat);
-  renderProducts(filtered);
-}
-
-/* ================= AUTH ================= */
-async function login() {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPass").value;
-
-  try {
-    const res = await fetch(API + "/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (data.access_token) {
-      localStorage.setItem("token", data.access_token);
-      localStorage.setItem("user", email);
-      alert("Login successful");
-    } else {
-      alert("Login failed");
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert("Login error");
-  }
-}
-
-async function signup() {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPass").value;
-
-  try {
-    const res = await fetch(API + "/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (data.message) {
-      alert("Account created");
-    } else {
-      alert("Signup failed");
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert("Signup error");
-  }
 }
