@@ -4,83 +4,157 @@
   <title>Product</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <header class="header">
-  <h1 onclick="location.href='/'">My Store</h1>
-  <div>Cart (<span id="cartCount">0</span>)</div>
+  <h1 onclick="goHome()">My Store</h1>
+  <div>
+    Cart (<span id="cartCount">0</span>)
+  </div>
 </header>
 
-<div id="product"></div>
+<div class="container" id="productPage"></div>
 
 <script>
 const API = "https://website-9gq9.onrender.com";
-let cart = JSON.parse(localStorage.getItem("cart")) || {};
 
+let cart = JSON.parse(localStorage.getItem("cart") || "{}");
+let currentProduct = null;
+let selectedColor = "Black";
+let selectedSize = "M";
+
+/* INIT */
 updateCart();
 
+/* GET PRODUCT */
 const id = new URLSearchParams(location.search).get("id");
 
 fetch(API + "/products/" + id)
-.then(r=>r.json())
-.then(p=>{
-  let color = "Red";
-  let size = "M";
+.then(res => res.json())
+.then(p => {
+  currentProduct = p;
 
-  render(p, color);
+  // default color
+  selectedColor = Object.keys(p.color_images)[0];
 
-  function render(p, color){
-    let imgs = p.colors[color];
-
-    document.getElementById("product").innerHTML = `
-      <div class="product">
-
-        <div>
-          <img id="main" src="${imgs[0]}" class="main-img">
-
-          <div class="thumbs">
-            ${imgs.map(i=>`<img src="${i}" onclick="change('${i}')">`).join("")}
-          </div>
-        </div>
-
-        <div>
-          <h1>${p.name}</h1>
-          <h2>$${p.price}</h2>
-
-          <p>${p.description}</p>
-
-          <label>Size</label>
-          <select onchange="size=this.value">
-            ${p.sizes.map(s=>`<option>${s}</option>`).join("")}
-          </select>
-
-          <label>Color</label>
-          <select onchange="color=this.value;render(p,color)">
-            ${Object.keys(p.colors).map(c=>`<option>${c}</option>`).join("")}
-          </select>
-
-          <button onclick="add(${p.id})" class="btn">Add to Cart</button>
-        </div>
-
-      </div>
-    `;
-  }
+  renderProduct();
 });
 
-function change(src){
-  document.getElementById("main").src = src;
+/* RENDER */
+function renderProduct(){
+
+  let images = currentProduct.color_images[selectedColor];
+
+  document.getElementById("productPage").innerHTML = `
+    <div class="product">
+
+      <!-- LEFT -->
+      <div>
+        <img id="mainImg" src="${images[0]}" class="main-img"
+             onerror="this.src='https://via.placeholder.com/400'">
+
+        <div class="thumbs">
+          ${images.map(img => `
+            <img src="${img}" 
+                 onclick="changeImage('${img}')"
+                 onerror="this.style.display='none'">
+          `).join("")}
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="product-info">
+
+        <h1>${currentProduct.name}</h1>
+        <h2>$${currentProduct.price}</h2>
+
+        <p>${currentProduct.description}</p>
+
+        <!-- SIZE -->
+        <label>Size</label>
+        <select onchange="selectedSize=this.value">
+          ${currentProduct.sizes.map(s=>`
+            <option>${s}</option>
+          `).join("")}
+        </select>
+
+        <!-- COLOR -->
+        <label>Color</label>
+        <div class="color-row">
+          ${Object.keys(currentProduct.color_images).map(c=>`
+            <button 
+              class="color-btn ${c === selectedColor ? 'active' : ''}"
+              onclick="changeColor('${c}')"
+            >
+              ${c}
+            </button>
+          `).join("")}
+        </div>
+
+        <br>
+
+        <button class="btn" onclick="addToCart(${currentProduct.id})">
+          Add to Cart
+        </button>
+
+      </div>
+
+    </div>
+  `;
 }
 
-function add(id){
-  cart[id] = {qty:(cart[id]?.qty||0)+1};
+/* IMAGE CHANGE */
+function changeImage(src){
+  document.getElementById("mainImg").src = src;
+}
+
+/* COLOR CHANGE */
+function changeColor(color){
+  selectedColor = color;
+  renderProduct();
+}
+
+/* ADD TO CART */
+function addToCart(id){
+
+  if (!cart[id]) {
+    cart[id] = { qty: 0, size: selectedSize, color: selectedColor };
+  }
+
+  cart[id].qty += 1;
+  cart[id].size = selectedSize;
+  cart[id].color = selectedColor;
+
   localStorage.setItem("cart", JSON.stringify(cart));
+
   updateCart();
+  toast("Added to cart 🛒");
 }
 
+/* CART UPDATE */
 function updateCart(){
-  let c=0;
-  Object.values(cart).forEach(i=>c+=i.qty);
-  document.getElementById("cartCount").innerText=c;
+  let fresh = JSON.parse(localStorage.getItem("cart") || "{}");
+
+  let count = 0;
+  Object.values(fresh).forEach(i => count += i.qty);
+
+  document.getElementById("cartCount").innerText = count;
+}
+
+/* TOAST */
+function toast(msg){
+  let t = document.createElement("div");
+  t.className = "toast";
+  t.innerText = msg;
+
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2000);
+}
+
+/* NAV */
+function goHome(){
+  window.location.href = "/";
 }
 </script>
 
