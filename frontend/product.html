@@ -9,67 +9,63 @@
 
 <header>
   <div class="container header-inner">
-    <h1 onclick="goHome()">🛒 My Store</h1>
+    <h1 onclick="goHome()">My Store</h1>
   </div>
 </header>
 
 <div class="container" id="productDetail"></div>
 
 <script>
+const API = "https://website-9gq9.onrender.com";
+
 const params = new URLSearchParams(window.location.search);
-const id = parseInt(params.get("id"));
+const id = params.get("id");
 
-const products = JSON.parse(localStorage.getItem("products"));
-const p = products.find(x => x.id === id);
-
-if(p){
-
-  const images = [
-    p.img,
-    p.img + "&1",
-    p.img + "&2",
-    p.img + "&3",
-    p.img + "&4"
-  ];
-
-  document.getElementById("productDetail").innerHTML = `
-    <div style="display:flex;gap:40px;margin-top:50px;">
-
-      <div>
-        <img id="mainImg" src="${images[0]}" style="width:350px;border-radius:10px">
-
-        <div style="display:flex;gap:10px;margin-top:10px;">
-          ${images.map(img=>`
-            <img src="${img}" width="60"
-            onclick="document.getElementById('mainImg').src='${img}'">
-          `).join("")}
-        </div>
-      </div>
-
-      <div>
-        <h1>${p.name}</h1>
-        <h2>$${p.price}</h2>
-
-        <p>Premium quality product. Comfortable, stylish and durable.</p>
-
-        <h3>Select Size:</h3>
-        <select id="size">
-          <option>S</option>
-          <option>M</option>
-          <option>L</option>
-          <option>XL</option>
-        </select>
-
-        <br><br>
-
-        <button class="checkout-btn" onclick="addToCart(${p.id})">
-          Add to Cart
-        </button>
-      </div>
-
-    </div>
-  `;
+if (!id) {
+  document.getElementById("productDetail").innerHTML = "Invalid product";
 }
+
+/* FETCH PRODUCT */
+fetch(`${API}/products/${id}`)
+  .then(res => res.json())
+  .then(p => {
+
+    if (!p || p.error) {
+      document.getElementById("productDetail").innerHTML = "Product not found";
+      return;
+    }
+
+    document.getElementById("productDetail").innerHTML = `
+      <div style="display:flex;gap:40px;margin-top:50px;flex-wrap:wrap;">
+
+        <div>
+          <img src="${p.image}" style="width:350px;border-radius:10px"
+               onerror="this.src='https://via.placeholder.com/400'">
+        </div>
+
+        <div>
+          <h1>${p.name}</h1>
+          <h2>$${p.price}</h2>
+
+          <p>Premium quality product.</p>
+
+          <label>Select Size:</label>
+          <select>
+            <option>S</option>
+            <option>M</option>
+            <option>L</option>
+          </select>
+
+          <br><br>
+
+          <button onclick="addToCart(${p.id})">
+            Add to Cart
+          </button>
+        </div>
+
+      </div>
+    `;
+  });
 
 function addToCart(id){
   let cart = JSON.parse(localStorage.getItem("cart")) || {};
