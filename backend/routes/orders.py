@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Header, Depends
 from fastapi.responses import FileResponse
 from db import ORDERS
 from reportlab.pdfgen import canvas
