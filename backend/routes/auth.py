@@ -1,20 +1,39 @@
 from fastapi import APIRouter, HTTPException
-from db import USERS
+from db import SessionLocal
 from models import User
+from passlib.hash import bcrypt
+from jose import jwt
+
+SECRET = "SECRET_KEY"
 
 router = APIRouter()
 
 @router.post("/register")
-def register(user: User):
-    if user.email in USERS:
-        raise HTTPException(400, "User already exists")
+def register(data: dict):
+    db = SessionLocal()
 
-    USERS[user.email] = user.password
-    return {"msg": "Registered successfully"}
+    if db.query(User).filter(User.email == data["email"]).first():
+        raise HTTPException(400, "User exists")
+
+    user = User(
+        email=data["email"],
+        password=bcrypt.hash(data["password"])
+    )
+
+    db.add(user)
+    db.commit()
+
+    return {"msg": "Registered"}
 
 @router.post("/login")
-def login(user: User):
-    if USERS.get(user.email) != user.password:
-        raise HTTPException(401, "Invalid credentials")
+def login(data: dict):
+    db = SessionLocal()
 
-    return {"msg": "Login success"}
+    user = db.query(User).filter(User.email == data["email"]).first()
+
+    if not user or not bcrypt.verify(data["password"], user.password):
+        raise HTTPException(401, "Invalid")
+
+    token = jwt.encode({"email": user.email}, SECRET)
+
+    return {"token": token}
