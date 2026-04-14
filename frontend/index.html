@@ -12,20 +12,45 @@
 
     <h1 onclick="goHome()">My Store</h1>
 
-    <input id="loginEmail" placeholder="Email">
-    <input id="loginPass" placeholder="Password">
+    <input id="search" placeholder="Search..." onkeyup="searchProducts()">
 
-    <button onclick="login()">Login</button>
-    <button onclick="signup()">Sign Up</button>
-    <button onclick="goOrders()">Orders</button>
+    <div class="auth">
+      <input id="loginEmail" placeholder="Email">
+      <input id="loginPass" type="password" placeholder="Password">
 
-    <button>Cart (<span id="cartCount">0</span>)</button>
+      <button onclick="login()">Login</button>
+      <button onclick="signup()">Sign Up</button>
+      <button onclick="goOrders()">Orders</button>
+    </div>
+
+    <button onclick="openCart()">
+      Cart (<span id="cartCount">0</span>)
+    </button>
 
   </div>
 </header>
 
 <div class="container">
   <div id="products" class="products"></div>
+</div>
+
+<!-- CART MODAL -->
+<div id="cartModal" class="modal">
+  <div class="modal-content">
+
+    <span class="close-btn" onclick="closeCart()">✖</span>
+
+    <h2>Your Cart</h2>
+
+    <div id="cartItems"></div>
+    <h3 id="total"></h3>
+
+    <input id="email" placeholder="Email">
+    <input id="address" placeholder="Address">
+
+    <button onclick="checkout()">Checkout</button>
+
+  </div>
 </div>
 
 <script src="script.js"></script>
