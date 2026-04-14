@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from db import SessionLocal
+from database import SessionLocal
 from models import User
 from passlib.hash import bcrypt
 from jose import jwt
@@ -17,13 +17,15 @@ def register(data: dict):
 
     user = User(
         email=data["email"],
-        password=bcrypt.hash(data["password"])
+        password=bcrypt.hash(data["password"]),
+        store_id=1
     )
 
     db.add(user)
     db.commit()
 
     return {"msg": "Registered"}
+
 
 @router.post("/login")
 def login(data: dict):
@@ -34,6 +36,6 @@ def login(data: dict):
     if not user or not bcrypt.verify(data["password"], user.password):
         raise HTTPException(401, "Invalid")
 
-    token = jwt.encode({"email": user.email}, SECRET)
+    token = jwt.encode({"email": user.email, "store_id": user.store_id}, SECRET)
 
     return {"token": token}
