@@ -18,46 +18,132 @@
 
 <script>
 const API = "https://website-9gq9.onrender.com";
-let cart = JSON.parse(localStorage.getItem("cart")||"{}");
 
+let cart = JSON.parse(localStorage.getItem("cart") || "{}");
+
+let product = null;
+let selectedColor = null;
+let selectedSize = null;
+
+/* INIT */
+updateCart();
+
+/* LOAD PRODUCT */
 const id = new URLSearchParams(location.search).get("id");
 
-fetch(API+"/products/"+id)
-.then(r=>r.json())
-.then(p=>{
+fetch(API + "/products/" + id)
+.then(res => res.json())
+.then(data => {
+  product = data;
 
-  let imgs = Object.values(p.color_images)[0];
+  selectedColor = product.variants[0].color;
+  selectedSize = product.variants[0].size;
 
-  document.getElementById("productPage").innerHTML=`
+  render();
+});
+
+/* RENDER */
+function render(){
+
+  const variants = product.variants;
+
+  // FILTER variants by selected color
+  const filtered = variants.filter(v => v.color === selectedColor);
+
+  const current = filtered.find(v => v.size === selectedSize) || filtered[0];
+
+  document.getElementById("productPage").innerHTML = `
     <div class="product">
 
+      <!-- IMAGE -->
       <div>
-        <img id="main" src="${imgs[0]}" class="main-img">
-        <div class="thumbs">
-          ${imgs.map(i=>`<img src="${i}" onclick="document.getElementById('main').src='${i}'">`).join("")}
-        </div>
+        <img src="${current.image}" class="main-img">
       </div>
 
+      <!-- INFO -->
       <div>
-        <h1>${p.name}</h1>
-        <h2>$${p.price}</h2>
-        <p>${p.description}</p>
 
-        <button onclick="add(${p.id})">Add to Cart</button>
+        <h1>${product.name}</h1>
+        <h2>$${current.price}</h2>
+        <p>${product.description}</p>
+
+        <!-- COLOR -->
+        <label>Color</label>
+        <div>
+          ${[...new Set(variants.map(v => v.color))].map(c => `
+            <button 
+              class="color-btn ${c===selectedColor?'active':''}"
+              onclick="selectColor('${c}')">
+              ${c}
+            </button>
+          `).join("")}
+        </div>
+
+        <!-- SIZE -->
+        <label>Size</label>
+        <div>
+          ${filtered.map(v => `
+            <button 
+              class="color-btn ${v.size===selectedSize?'active':''}"
+              onclick="selectSize('${v.size}')">
+              ${v.size}
+            </button>
+          `).join("")}
+        </div>
+
+        <br>
+
+        <button onclick="addToCart(${current.id})">
+          Add to Cart
+        </button>
+
       </div>
 
     </div>
   `;
-});
-
-function add(id){
-  if(!cart[id]) cart[id]={qty:0};
-  cart[id].qty++;
-  localStorage.setItem("cart",JSON.stringify(cart));
-  alert("Added");
 }
 
-function goHome(){ location.href="/"; }
+/* SELECT COLOR */
+function selectColor(color){
+  selectedColor = color;
+
+  // auto adjust size
+  const sizes = product.variants.filter(v=>v.color===color);
+  selectedSize = sizes[0].size;
+
+  render();
+}
+
+/* SELECT SIZE */
+function selectSize(size){
+  selectedSize = size;
+  render();
+}
+
+/* CART */
+function addToCart(variantId){
+
+  if(!cart[variantId]){
+    cart[variantId] = { qty: 0 };
+  }
+
+  cart[variantId].qty++;
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+
+  updateCart();
+  alert("Added to cart");
+}
+
+function updateCart(){
+  let count = 0;
+  Object.values(cart).forEach(i=>count+=i.qty);
+  document.getElementById("cartCount").innerText = count;
+}
+
+function goHome(){
+  window.location.href = "/";
+}
 </script>
 
 </body>
