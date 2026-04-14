@@ -1,48 +1,35 @@
-from fastapi import APIRouter, HTTPException, Header, Depends
-from fastapi.responses import FileResponse
-from db import ORDERS
-from reportlab.pdfgen import canvas
+from fastapi import APIRouter, HTTPException
+from database import SessionLocal
+from models import Order
+import json
 
 router = APIRouter()
 
 
-# GET SINGLE ORDER
-@router.get("/{order_id}")
-def get_order(order_id: str):
-    order = ORDERS.get(order_id)
+@router.get("/{id}")
+def get_order(id: int):
+    db = SessionLocal()
 
-    if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
+    o = db.query(Order).filter(Order.id == id).first()
 
-    return order
+    if not o:
+        raise HTTPException(404, "Not found")
+
+    return {
+        "id": o.id,
+        "status": o.status,
+        "total": o.total,
+        "items": json.loads(o.items)
+    }
 
 
-# USER ORDER HISTORY
 @router.get("/user/{email}")
-def get_user_orders(email: str):
-    return [o for o in ORDERS.values() if o.get("email") == email]
+def user_orders(email: str):
+    db = SessionLocal()
 
+    orders = db.query(Order).filter(Order.email == email).all()
 
-# INVOICE PDF
-@router.get("/invoice/{order_id}")
-def invoice(order_id: str):
-    order = ORDERS.get(order_id)
-
-    if not order:
-        raise HTTPException(404, "Order not found")
-
-    file = f"invoice_{order_id}.pdf"
-
-    c = canvas.Canvas(file)
-    c.drawString(100, 800, f"Order ID: {order_id}")
-    c.drawString(100, 780, f"Total: ${order['total']}")
-    c.drawString(100, 760, f"Status: {order['status']}")
-
-    y = 720
-    for item in order["items"]:
-        c.drawString(100, y, f"Product {item['id']} x {item['qty']}")
-        y -= 20
-
-    c.save()
-
-    return FileResponse(file, filename=file)
+    return [
+        {"id": o.id, "total": o.total, "status": o.status}
+        for o in orders
+    ]
