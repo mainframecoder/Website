@@ -1,16 +1,31 @@
 from fastapi import FastAPI
-from database import Base, engine
+from fastapi.middleware.cors import CORSMiddleware
+
+# 🔥 IMPORT ROUTES
 from routes import products, auth, orders, payment
 
 app = FastAPI()
 
-# create tables
+# ================= CORS FIX ================= #
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://website99998.netlify.app",  # your frontend
+        "http://localhost:3000",
+        "http://localhost:5500",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-app.include_router(products.router, prefix="/products")
-app.include_router(auth.router, prefix="/auth")
-app.include_router(orders.router, prefix="/orders")
-app.include_router(payment.router, prefix="/payment")
-
+# ================= HEALTH CHECK ================= #
 @app.get("/")
-def root():
-    return {"status": "ok"}
+def home():
+    return {"message": "API running 🚀"}
+
+# ================= ROUTES ================= #
+app.include_router(products.router, prefix="/products", tags=["Products"])
+app.include_router(auth.router, prefix="/auth", tags=["Auth"])
+app.include_router(orders.router, prefix="/orders", tags=["Orders"])
+app.include_router(payment.router, prefix="/payment", tags=["Payment"])
