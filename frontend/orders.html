@@ -7,9 +7,8 @@
 <body>
 
 <header class="header">
-  <h1 onclick="goHome()">🛒 My Store</h1>
-  <div>
-    Cart (<span id="cartCount">0</span>)
+  <div class="container header-inner">
+    <h1 onclick="goHome()">My Store</h1>
   </div>
 </header>
 
@@ -18,65 +17,31 @@
   <div id="orders"></div>
 </div>
 
+<script src="script.js"></script>
+
 <script>
-const API = "https://website-9gq9.onrender.com";
 const email = localStorage.getItem("user");
 
-/* CART COUNT */
-function updateCart(){
-  let cart = JSON.parse(localStorage.getItem("cart") || "{}");
-  let count = 0;
-  Object.values(cart).forEach(i=>count+=i.qty || i);
-  document.getElementById("cartCount").innerText = count;
-}
-updateCart();
-
-/* LOGIN CHECK */
 if(!email){
-  document.getElementById("orders").innerHTML = `
-    <p>Please login to view orders</p>
-  `;
+  document.getElementById("orders").innerHTML = "Login first";
 }else{
-
-  fetch(`${API}/orders/user/${email}`)
+  fetch(API + "/orders/user/" + email)
   .then(res=>res.json())
   .then(data=>{
-
-    if(!data || data.length === 0){
-      document.getElementById("orders").innerHTML = `
-        <p>No orders yet 🛍️</p>
-      `;
-      return;
-    }
-
-    let html = data.map(o=>`
-      <div class="order-card">
-        <p><b>ID:</b> ${o.id}</p>
-        <p><b>Status:</b> ${o.status}</p>
-        <p><b>Total:</b> $${o.total}</p>
-
-        <button onclick="downloadInvoice('${o.id}')">
-          Download Invoice
-        </button>
-      </div>
-    `).join("");
-
-    document.getElementById("orders").innerHTML = html;
-  })
-  .catch(()=>{
-    document.getElementById("orders").innerHTML = `
-      <p>Error loading orders</p>
-    `;
+    document.getElementById("orders").innerHTML =
+      data.map(o=>`
+        <div class="card">
+          <p>ID: ${o.id}</p>
+          <p>Status: ${o.status}</p>
+          <p>Total: $${o.total}</p>
+          <button onclick="goTrack(${o.id})">Track</button>
+        </div>
+      `).join("");
   });
 }
 
-/* DOWNLOAD */
-function downloadInvoice(id){
-  window.open(API + "/orders/invoice/" + id);
-}
-
-function goHome(){
-  window.location.href = "/";
+function goTrack(id){
+  window.location.href = "track.html?order_id=" + id;
 }
 </script>
 
