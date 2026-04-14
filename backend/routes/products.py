@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, joinedload
 from database import SessionLocal
 from models import Product, Variant
-from cache import redis_client
 import json
 
 router = APIRouter()
@@ -17,18 +16,9 @@ def get_db():
 
 @router.get("/")
 def get_products(db: Session = Depends(get_db)):
+    products = db.query(Product).options(joinedload(Product.variants)).all()
 
-    cache_key = "products"
-
-    cached = redis_client.get(cache_key)
-    if cached:
-        return json.loads(cached)
-
-    products = db.query(Product).options(
-        joinedload(Product.variants)
-    ).all()
-
-    result = [
+    return [
         {
             "id": p.id,
             "name": p.name,
@@ -40,50 +30,55 @@ def get_products(db: Session = Depends(get_db)):
                     "size": v.size,
                     "price": v.price,
                     "image": v.image
-                }
-                for v in p.variants
+                } for v in p.variants
             ]
-        }
-        for p in products
+        } for p in products
     ]
 
-    redis_client.setex(cache_key, 60, json.dumps(result))
 
-    return result
+@router.get("/{id}")
+def get_product(id: int, db: Session = Depends(get_db)):
+    p = db.query(Product).options(joinedload(Product.variants)).filter(Product.id == id).first()
+
+    if not p:
+        return {"error": "not found"}
+
+    return {
+        "id": p.id,
+        "name": p.name,
+        "description": p.description,
+        "variants": [
+            {
+                "id": v.id,
+                "color": v.color,
+                "size": v.size,
+                "price": v.price,
+                "image": v.image
+            } for v in p.variants
+        ]
+    }
 
 
 @router.post("/")
 def create_product(data: dict, db: Session = Depends(get_db)):
-
-    product = Product(
-        name=data["name"],
-        description=data["description"],
-        store_id=1
-    )
-
-    db.add(product)
+    p = Product(name=data["name"], description=data["description"])
+    db.add(p)
     db.commit()
-    db.refresh(product)
+    db.refresh(p)
 
-    redis_client.delete("products")
-
-    return {"id": product.id}
+    return {"id": p.id}
 
 
-@router.post("/{product_id}/variant")
-def add_variant(product_id: int, data: dict, db: Session = Depends(get_db)):
-
-    variant = Variant(
-        product_id=product_id,
+@router.post("/{id}/variant")
+def add_variant(id: int, data: dict, db: Session = Depends(get_db)):
+    v = Variant(
+        product_id=id,
         color=data["color"],
         size=data["size"],
         price=data["price"],
         image=data["image"]
     )
-
-    db.add(variant)
+    db.add(v)
     db.commit()
-
-    redis_client.delete("products")
 
     return {"msg": "added"}
