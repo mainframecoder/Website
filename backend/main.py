@@ -5,7 +5,6 @@ from routes import products, auth, orders, payment
 app = FastAPI()
 
 # create tables
-Base.metadata.create_all(bind=engine)
 
 app.include_router(products.router, prefix="/products")
 app.include_router(auth.router, prefix="/auth")
