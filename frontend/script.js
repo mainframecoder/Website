@@ -3,40 +3,30 @@ const API = "https://website-9gq9.onrender.com";
 let products = [];
 let cart = JSON.parse(localStorage.getItem("cart") || "{}");
 
-/* ================= INIT ================= */
+/* INIT */
 window.onload = () => {
   loadProducts();
   updateCart();
-
-  // sync cart across tabs/pages
-  window.addEventListener("storage", updateCart);
 };
 
-/* ================= LOAD PRODUCTS ================= */
-async function loadProducts() {
-  try {
-    const res = await fetch(API + "/products");
-    const data = await res.json();
-
-    products = Array.isArray(data) ? data : Object.values(data);
-
-    renderProducts(products);
-  } catch (err) {
-    console.error("Error loading products:", err);
-  }
+/* PRODUCTS */
+async function loadProducts(){
+  const res = await fetch(API + "/products");
+  const data = await res.json();
+  products = data;
+  renderProducts(products);
 }
 
-/* ================= RENDER PRODUCTS ================= */
-function renderProducts(list) {
+function renderProducts(list){
   const el = document.getElementById("products");
-  if (!el) return;
+  if(!el) return;
 
-  el.innerHTML = list.map(p => {
-    const v = p.variants[0]; // first variant
+  el.innerHTML = list.map(p=>{
+    const v = p.variants[0];
 
     return `
       <div class="card" onclick="openProduct(${p.id})">
-        <img src="${v.image}" onerror="this.style.display='none'">
+        <img src="${v.image}">
         <h3>${p.name}</h3>
         <p>$${v.price}</p>
 
@@ -48,229 +38,123 @@ function renderProducts(list) {
   }).join("");
 }
 
-/* ================= NAVIGATION ================= */
-function openProduct(id) {
+function openProduct(id){
   window.location.href = "product.html?id=" + id;
 }
 
-function goHome() {
-  window.location.href = "/";
-}
-
-function goOrders() {
-  window.location.href = "orders.html";
-}
-
-/* ================= CART ================= */
-function addToCart(variantId) {
-  if (!cart[variantId]) {
-    cart[variantId] = { qty: 0 };
-  }
-
-  cart[variantId].qty++;
-
+/* CART */
+function addToCart(id){
+  if(!cart[id]) cart[id] = {qty:0};
+  cart[id].qty++;
   localStorage.setItem("cart", JSON.stringify(cart));
-
   updateCart();
-  toast("Added to cart 🛒");
 }
 
-function updateCart() {
+function updateCart(){
   const el = document.getElementById("cartCount");
-  if (!el) return;
+  if(!el) return;
 
   let count = 0;
-  Object.values(cart).forEach(i => count += i.qty);
-
+  Object.values(cart).forEach(i=>count+=i.qty);
   el.innerText = count;
 }
 
-/* ================= CART MODAL ================= */
-function openCart() {
-  document.getElementById("cartModal").style.display = "block";
+function openCart(){
+  document.getElementById("cartModal").style.display="block";
   renderCart();
 }
 
-function closeCart() {
-  document.getElementById("cartModal").style.display = "none";
+function closeCart(){
+  document.getElementById("cartModal").style.display="none";
 }
 
-function renderCart() {
+function renderCart(){
   const el = document.getElementById("cartItems");
-  const totalEl = document.getElementById("total");
-
-  if (!el) return;
-
-  let html = "";
   let total = 0;
 
-  products.forEach(p => {
-    p.variants.forEach(v => {
-      if (cart[v.id]) {
-        let qty = cart[v.id].qty;
-        total += v.price * qty;
+  let html = "";
+
+  products.forEach(p=>{
+    p.variants.forEach(v=>{
+      if(cart[v.id]){
+        const q = cart[v.id].qty;
+        total += v.price*q;
 
         html += `
-          <div style="margin-bottom:10px;">
-            <b>${p.name}</b><br>
-            ${v.color} / ${v.size}<br>
-            $${v.price} × ${qty}
-
-            <button onclick="changeQty(${v.id},1)">+</button>
-            <button onclick="changeQty(${v.id},-1)">-</button>
+          <div>
+            ${p.name} (${v.color}/${v.size}) - ${q}
           </div>
         `;
       }
     });
   });
 
-  el.innerHTML = html || "Cart is empty";
-  if (totalEl) totalEl.innerText = "Total: $" + total;
+  el.innerHTML = html || "Empty";
+  document.getElementById("total").innerText = "Total: $" + total;
 }
 
-function changeQty(id, delta) {
-  if (!cart[id]) return;
-
-  cart[id].qty += delta;
-
-  if (cart[id].qty <= 0) {
-    delete cart[id];
-  }
-
-  localStorage.setItem("cart", JSON.stringify(cart));
-
-  renderCart();
-  updateCart();
-}
-
-/* ================= CHECKOUT ================= */
-async function checkout() {
+/* CHECKOUT */
+async function checkout(){
   const email = document.getElementById("email").value;
   const address = document.getElementById("address").value;
 
-  if (!email || !address) {
-    alert("Enter email & address");
-    return;
-  }
+  const items = Object.keys(cart).map(id=>({
+    variant_id: parseInt(id),
+    qty: cart[id].qty
+  }));
 
-  let items = [];
-
-  Object.keys(cart).forEach(id => {
-    items.push({
-      variant_id: parseInt(id),
-      qty: cart[id].qty
-    });
+  const res = await fetch(API + "/payment/create-checkout-session",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({email,address,items})
   });
 
-  try {
-    const res = await fetch(API + "/payment/create-checkout-session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email,
-        address,
-        items
-      })
-    });
+  const data = await res.json();
 
-    const data = await res.json();
+  window.location.href = data.url;
+}
 
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Checkout failed");
-    }
+/* AUTH */
+async function signup(){
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPass").value;
 
-  } catch (err) {
-    console.error(err);
-    alert("Error in checkout");
+  const res = await fetch(API+"/auth/register",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({email,password})
+  });
+
+  alert("Registered");
+}
+
+async function login(){
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPass").value;
+
+  const res = await fetch(API+"/auth/login",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({email,password})
+  });
+
+  const data = await res.json();
+
+  if(data.access_token){
+    localStorage.setItem("user",email);
+    alert("Logged in");
   }
 }
 
-/* ================= SEARCH ================= */
-function searchProducts() {
+function goOrders(){
+  window.location.href = "orders.html";
+}
+
+function goHome(){
+  window.location.href = "/";
+}
+
+function searchProducts(){
   const q = document.getElementById("search").value.toLowerCase();
-
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(q)
-  );
-
-  renderProducts(filtered);
-}
-
-/* ================= FILTER ================= */
-function filterCategory(cat) {
-  if (!cat) return renderProducts(products);
-
-  const filtered = products.filter(p =>
-    p.category && p.category === cat
-  );
-
-  renderProducts(filtered);
-}
-
-/* ================= AUTH ================= */
-async function signup() {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPass").value;
-
-  try {
-    const res = await fetch(API + "/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    alert(data.msg || "Signup done");
-
-  } catch (err) {
-    console.error(err);
-    alert("Signup error");
-  }
-}
-
-async function login() {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPass").value;
-
-  try {
-    const res = await fetch(API + "/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (data.token) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", email);
-      alert("Login successful");
-    } else {
-      alert("Login failed");
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert("Login error");
-  }
-}
-
-/* ================= TOAST ================= */
-function toast(msg) {
-  let t = document.createElement("div");
-  t.className = "toast";
-  t.innerText = msg;
-
-  document.body.appendChild(t);
-
-  setTimeout(() => t.remove(), 2000);
+  renderProducts(products.filter(p=>p.name.toLowerCase().includes(q)));
 }
