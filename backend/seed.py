@@ -1,21 +1,36 @@
 from database import SessionLocal
-from models import Product, Variant
+from models import Product
 
-db = SessionLocal()
+def seed_data():
+    db = SessionLocal()
 
-p = Product(name="Nike Shoes", description="Premium shoes")
-db.add(p)
-db.commit()
-db.refresh(p)
+    if db.query(Product).first():
+        print("Already seeded")
+        return
 
-db.add_all([
-    Variant(product_id=p.id, color="Red", size="M", price=100,
-            image="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"),
+    products = [
+        Product(
+            name="Nike Shoes",
+            price=99,
+            image="https://images.unsplash.com/photo-1542291026-7eec264c27ff",
+            category="footwear"
+        ),
+        Product(
+            name="Blue Jeans",
+            price=49,
+            image="https://images.unsplash.com/photo-1541099649105-f69ad21f3246",
+            category="clothing"
+        ),
+        Product(
+            name="Watch",
+            price=199,
+            image="https://images.unsplash.com/photo-1519741497674-611481863552",
+            category="accessories"
+        )
+    ]
 
-    Variant(product_id=p.id, color="Black", size="M", price=120,
-            image="https://images.unsplash.com/photo-1528701800489-20be3c3e9c7e?w=500")
-])
+    db.add_all(products)
+    db.commit()
+    db.close()
 
-db.commit()
-
-print("Seed done")
+    print("DB Seeded ✅")
