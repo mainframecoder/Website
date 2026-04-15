@@ -2,10 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes import products, auth, orders, payment
+from database import Base, engine
 
 app = FastAPI()
 
-# 🔥 TEMP: allow all (fix first, secure later)
+# 🔥 CREATE TABLES
+Base.metadata.create_all(bind=engine)
+
+# 🔥 FORCE CORS (temporary open)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
