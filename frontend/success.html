@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Order Success</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <div class="container header-inner">
+    <h1 onclick="goHome()">🛒 My Store</h1>
+  </div>
+</header>
+
+<div class="container" style="display:flex;justify-content:center;align-items:center;height:80vh;">
+
+  <div class="box" style="text-align:center; width:400px;">
+
+    <h1>✅ Payment Successful</h1>
+    <p>Your order has been placed.</p>
+
+    <div id="orderInfo" style="margin-top:20px;"></div>
+
+    <button class="checkout-btn" onclick="goHome()">Continue Shopping</button>
+
+    <button class="checkout-btn" onclick="goTrack()" style="margin-top:10px;">
+      Track Order
+    </button>
+
+  </div>
+
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const orderId = params.get("order_id");
+
+if(orderId){
+  document.getElementById("orderInfo").innerHTML = `
+    <p><b>Order ID:</b> ${orderId}</p>
+  `;
+}
+
+function goHome(){
+  window.location.href = "/";
+}
+
+function goTrack(){
+  if(orderId){
+    window.location.href = "track.html?order_id=" + orderId;
+  } else {
+    window.location.href = "track.html";
+  }
+}
+</script>
+
+</body>
+</html>
