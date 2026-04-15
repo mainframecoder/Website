@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Product</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="productDetail" style="padding:50px;text-align:center"></div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const id = parseInt(params.get("id"));
+
+const products = JSON.parse(localStorage.getItem("products"));
+
+const p = products.find(x => x.id === id);
+
+if(p){
+  document.getElementById("productDetail").innerHTML = `
+    <img src="${p.img}" style="width:300px;border-radius:10px">
+    <h1>${p.name}</h1>
+    <h2>$${p.price}</h2>
+  `;
+} else {
+  document.getElementById("productDetail").innerHTML = "<h2>Product not found</h2>";
+}
+</script>
+
+</body>
+</html>

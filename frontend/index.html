@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Store</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <div class="container header-inner">
+
+    <h1 onclick="goHome()">🛒 My Store</h1>
+
+    <input id="search" placeholder="Search..." onkeyup="searchProducts()">
+
+    <select onchange="filterCategory(this.value)">
+      <option value="">All Categories</option>
+      <option value="clothing">Clothing</option>
+      <option value="footwear">Footwear</option>
+      <option value="accessories">Accessories</option>
+    </select>
+
+    <button class="cart-btn" id="cartBtn">
+      🛒 Cart (<span id="cartCount">0</span>)
+    </button>
+
+  </div>
+</header>
+
+<div class="container">
+  <div class="products" id="products"></div>
+</div>
+
+<!-- CART MODAL -->
+<div id="cartModal" class="modal">
+  <div class="modal-content">
+    <h2>Your Cart</h2>
+
+    <div id="cartItems"></div>
+    <h3 id="total"></h3>
+
+    <input id="address" placeholder="Delivery Address"><br><br>
+    <input id="email" placeholder="Email"><br><br>
+
+    <button class="checkout-btn" onclick="checkout()">Checkout</button>
+    <br><br>
+    <button onclick="closeCart()">Close</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
